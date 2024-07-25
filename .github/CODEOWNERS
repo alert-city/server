@@ -1,0 +1,8 @@
+# 所有文件由这些用户审核
+* @username1 @username2
+
+# 特定目录只能由这些用户审核，不能由上面的用户审核
+/docs/ @team1
+
+# 特定文件只能由这些用户审核，不能由上面的用户审核
+/config/settings.yml @username3
