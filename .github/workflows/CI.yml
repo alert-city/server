@@ -1,30 +1,40 @@
-#name: CI pipeline
-#on:
-#  workflow_dispatch:
-#  workflow_call:
-#  pull_request:
-#    branches:
-#      - 'dev'
-#jobs:
-#  test:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: checkout code
-#        uses: actions/checkout@v4
-#      - name: setup node
-#        uses: actions/setup-node@v4
-#        with:
-#          node-version: '20.10'
-#      - name: get node version
-#        id: node
-#        run: |
-#          echo ":set-output name=node_version::$(node -v)"
-#      - name: cache node_modules
-#        uses: actions/cache@v4
-#        with:
-#          path: node_modules
-#          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}-${{ steps.node.outputs.node_version }}
-#      - name: install dependencies
-#        run: yarn
-#      - name: unit tests
-#        run: yarn run test
+name: CI pipeline
+on:
+  workflow_dispatch:
+#  允许手动触发此工作流。
+  workflow_call:
+#  允许其他工作流调用此工作流。
+  pull_request:
+    branches:
+      - 'dev'
+#  每当有人提交 PR 到 dev 分支时，触发此工作流。
+  push:
+    branches:
+      - 'dev'
+#  每当有人push到dev分支时，触发此工作流。
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.9.0'
+      - name: get node version
+        id: node
+        run: |
+          echo ":set-output name=node_version::$(node -v)"
+# 通过 echo 命令将 node -v 的输出结果赋值给 node_version 变量。以便在下一步中使用。
+      - name: cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}-${{ steps.node.outputs.node_version }}
+# 通过 hashFiles 函数生成一个 hash 值，用于标识缓存的唯一性。使用 actions/cache@v4 Action 缓存 node_modules 目录，以加快后续的构建速度。如果缓存命中（即相同的 yarn.lock 文件和 Node.js 版本未更改），则跳过依赖安装步骤，直接使用缓存的依赖。缓存键包括操作系统类型、yarn.lock 文件的哈希值，以及 node_version。
+      - name: install dependencies
+        run: yarn
+      - name: unit tests
+        run: yarn run test
