@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserResolver } from './user.resolver';
 import { UserService } from './user.service';
-import { UserResponseDto } from '@/common/dtos/user-response.dto';
-import { UserRequestDto } from '@/common/dtos/user-request.dto';
-import { CombinedAuthGuard } from '@/common/guards/combined-auth.guard';
+import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
+import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
+import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
 import { AuthService } from '@/modules/auth/auth.service';
 import { TokenService } from '@/modules/auth/token.service';
-import { AccessTokenGuard } from '@/common/guards/jwt-access-auth.guard';
-import { RefreshJwtAuthGuard } from '@/common/guards/jwt-refresh-auth.guard';
+import { AccessTokenGuard } from '@/modules/auth/guards/jwt-access-auth.guard';
+import { RefreshJwtAuthGuard } from '@/modules/auth/guards/jwt-refresh-auth.guard';
 import { NotFoundException } from '@nestjs/common';
 
 describe('UserResolver', () => {

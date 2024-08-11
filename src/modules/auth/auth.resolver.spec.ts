@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
-import { LoginResponseDto } from '@/common/dtos/login-response.dto';
-import { LoginRequestDto } from '@/common/dtos/login-request.dto';
+import { LoginResponseDto } from '@/modules/auth/dtos/login-response.dto';
+import { LoginRequestDto } from '@/modules/auth/dtos/login-request.dto';
 
 describe('AuthResolver', () => {
   let resolver: AuthResolver;

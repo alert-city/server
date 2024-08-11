@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
-import { LoginResponseDto } from '@/common/dtos/login-response.dto';
-import { LoginRequestDto } from '@/common/dtos/login-request.dto';
+import { LoginResponseDto } from '@/modules/auth/dtos/login-response.dto';
+import { LoginRequestDto } from '@/modules/auth/dtos/login-request.dto';
 import { AuthService } from './auth.service';
 
 @Resolver()

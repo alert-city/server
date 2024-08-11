@@ -3,10 +3,10 @@ import { JwtService } from '@nestjs/jwt';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { TokenService } from '@/modules/auth/token.service';
 import { UserService } from '@/modules/user/user.service';
-import { LoginResponseDto } from '@/common/dtos/login-response.dto';
-import { LoginRequestDto } from '@/common/dtos/login-request.dto';
-import { UserResponseDto } from '@/common/dtos/user-response.dto';
-import { UserRequestDto } from '@/common/dtos/user-request.dto';
+import { LoginResponseDto } from '@/modules/auth/dtos/login-response.dto';
+import { LoginRequestDto } from '@/modules/auth/dtos/login-request.dto';
+import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
+import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
 import { Response } from 'express';
 
 @Injectable()

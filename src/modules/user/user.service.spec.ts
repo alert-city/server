@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { UserResponseDto } from '@/common/dtos/user-response.dto';
+import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import { NotFoundException } from '@nestjs/common';
-import { UserRequestDto } from '@/common/dtos/user-request.dto';
+import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
 
 describe('UserService', () => {
   let userService: UserService;

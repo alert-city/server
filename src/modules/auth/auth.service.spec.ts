@@ -3,9 +3,9 @@ import { AuthService } from './auth.service';
 import { UserService } from '@/modules/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { TokenService}   from '@/modules/auth/token.service';
-import { LoginResponseDto } from '@/common/dtos/login-response.dto';
-import { LoginRequestDto } from '@/common/dtos/login-request.dto';
-import { UserResponseDto } from '@/common/dtos/user-response.dto';
+import { LoginResponseDto } from '@/modules/auth/dtos/login-response.dto';
+import { LoginRequestDto } from '@/modules/auth/dtos/login-request.dto';
+import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import * as bcrypt from 'bcryptjs';
 import { RefreshTokenResponse } from '@/modules/auth/token.service';
 

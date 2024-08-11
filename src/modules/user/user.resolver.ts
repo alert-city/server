@@ -1,12 +1,12 @@
 import { Args, Context, GqlExecutionContext, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UserService } from './user.service';
-import { UserResponseDto } from '@/common/dtos/user-response.dto';
-import { UserRequestDto } from '@/common/dtos/user-request.dto';
+import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
+import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
 import { createUserSchema, updateUserSchema } from '@/validation/schemas/user/user.schema';
-import { ZodValidationInterceptor } from '@/common/Interceptors/user-validation.interceptor';
+import { ZodValidationInterceptor } from '@/modules/user/Interceptors/user-validation.interceptor';
 import { UseInterceptors, UseGuards } from '@nestjs/common';
-import { CombinedAuthGuard } from '@/common/guards/combined-auth.guard';
-import { UpdateUserRequestDto } from '@/common/dtos/user-request.dto';
+import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
+import { UpdateUserRequestDto } from '@/modules/user/dtos/user-request.dto';
 
 @Resolver()
 export class UserResolver {

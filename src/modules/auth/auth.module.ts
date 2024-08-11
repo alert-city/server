@@ -6,9 +6,9 @@ import { TokenService } from './token.service';
 import { UserModule } from '@/modules/user/user.module';
 import { ConfigModule,ConfigService } from '@nestjs/config';
 import { RefreshJwtStrategy } from './strategies/refresh-jwt.strategy';
-import { AccessTokenGuard } from '@/common/guards/jwt-access-auth.guard';
-import { RefreshJwtAuthGuard } from '@/common/guards/jwt-refresh-auth.guard';
-import { CombinedAuthGuard } from '@/common/guards/combined-auth.guard';
+import { AccessTokenGuard } from '@/modules/auth/guards/jwt-access-auth.guard';
+import { RefreshJwtAuthGuard } from '@/modules/auth/guards/jwt-refresh-auth.guard';
+import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
 import { AccessJwtStrategy }  from './strategies/access-jwt.strategy';
 
 

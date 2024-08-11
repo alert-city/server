@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserResponseDto } from '@/common/dtos/user-response.dto';
-import { UserRequestDto } from '@/common/dtos/user-request.dto';
-import { UpdateUserRequestDto } from '@/common/dtos/user-request.dto';
+import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
+import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
+import { UpdateUserRequestDto } from '@/modules/user/dtos/user-request.dto';
 import * as bcrypt from 'bcryptjs';
 
 

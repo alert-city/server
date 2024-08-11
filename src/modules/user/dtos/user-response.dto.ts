@@ -1,6 +1,6 @@
 import { Field, ObjectType, ID} from '@nestjs/graphql';
-import { UserNameResponseDto } from '@/common/dtos/user-name.dto';
-import { UserRoleResponseDto  } from '@/common/dtos/user-usertype.dto';
+import { UserNameResponseDto } from '@/modules/user/dtos/user-name.dto';
+import { UserRoleResponseDto  } from '@/modules/user/dtos/user-usertype.dto';
 
 
 @ObjectType()
