@@ -24,7 +24,7 @@ brew install autossh
 ```sh
 chmod 600 /path/to/private-key-file
 ````
-5. Create a new file in your home directory called `config` and add the following content:
+5. Run the following command in your terminal:
 ```sh
 autossh -M 0 -f -N -L 5003:localhost:27017  -i "/path/to/private-key-file" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@ec2-13-239-162-77.ap-southeast-2.compute.amazonaws.com
 ```
