@@ -4,9 +4,9 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 import { Request } from 'express';
 
 @Injectable()
-export class RefreshJwtAuthGuard extends AuthGuard('jwt-refresh-token') {
+export class RefreshTokenGuard extends AuthGuard('jwt-refresh-token') {
   getRequest(context: ExecutionContext): Request {
-    console.log('开始验证 refresh token');
+    // console.log('开始验证 refresh token');
     const ctx = GqlExecutionContext.create(context);
     return ctx.getContext().req;
   }
@@ -17,6 +17,7 @@ export class RefreshJwtAuthGuard extends AuthGuard('jwt-refresh-token') {
     if (err || !user) {
       throw err || new UnauthorizedException('Both tokens are invalid');
     }
+    // console.log("refreshToken有效");
     return user;
   }
 }

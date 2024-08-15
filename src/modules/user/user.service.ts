@@ -5,7 +5,7 @@ import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
 import { UpdateUserRequestDto } from '@/modules/user/dtos/user-request.dto';
 import * as bcrypt from 'bcryptjs';
-
+import  { UpdateFailedException } from '@/common/exceptions/update-failed.exception';
 
 @Injectable()
 export class UserService {
@@ -17,7 +17,7 @@ export class UserService {
   async findAllUsers(): Promise<UserResponseDto[]> {
     const allUsers = await this.userModel.find().exec();
     if (allUsers.length === 0) {
-      throw new NotFoundException('Users not found');
+      throw new UpdateFailedException();
     }
     return allUsers;
   }

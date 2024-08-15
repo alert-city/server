@@ -4,6 +4,7 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import { NotFoundException } from '@nestjs/common';
+import { UpdateFailedException } from '@/common/exceptions/update-failed.exception';
 import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
 
 describe('UserService', () => {
@@ -47,9 +48,12 @@ describe('UserService', () => {
           name: { firstName: 'John', lastName: 'Doe' },
           username: 'jinyuanzhang1992@hotmail.com',
           password: 'zzzz',
-          role: 'normal',
+          role: ['normal'],
           mobilePhone: '+61412345678',
           refreshToken: null,
+          accountType: 'personal',
+          accessToken: 'accessToken',
+          organization: ['123'],
         },
       ];
       jest.spyOn(userModel, 'find').mockReturnValue({
@@ -58,11 +62,11 @@ describe('UserService', () => {
       expect(await userService.findAllUsers()).toBe(mockUsers);
     });
 
-    it('should throw NotFoundException if no users are found', async () => {
+    it('should throw UpdateFailedException if no users are found', async () => {
       jest.spyOn(userModel,'find').mockReturnValue({
       exec:jest.fn().mockResolvedValue([]),
       } as any);
-      await expect(userService.findAllUsers()).rejects.toThrow(NotFoundException);
+      await expect(userService.findAllUsers()).rejects.toThrow(UpdateFailedException);
     });
   });
 
@@ -74,9 +78,12 @@ describe('UserService', () => {
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
         password: 'zzzz',
-        role: 'normal',
+        role: ['normal'],
         mobilePhone: '+61412345678',
         refreshToken: null,
+        accountType: 'personal',
+        accessToken: 'accessToken',
+        organization: ['123'],
       }
       jest.spyOn(userModel,'findById').mockReturnValue({
       exec:jest.fn().mockResolvedValue(mockUser),
@@ -99,17 +106,22 @@ describe('UserService', () => {
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
         password: 'zzzz',
-        role: 'normal',
+        role: ['normal'],
         mobilePhone: '+61412345678',
+        accountType: 'personal',
+        organization: ['123'],
       }
       const mockUser:UserResponseDto ={
         id: '123',
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
         password: 'zzzz',
-        role: 'normal',
+        role: ['normal'],
         mobilePhone: '+61412345678',
         refreshToken: null,
+        accountType: 'personal',
+        accessToken: 'accessToken',
+        organization: ['123'],
       }
       jest.spyOn(userModel,'findByIdAndUpdate').mockReturnValue({
       exec:jest.fn().mockResolvedValue(mockUser),
@@ -123,8 +135,10 @@ describe('UserService', () => {
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
         password: 'zzzz',
-        role: 'normal',
+        role: ['normal'],
         mobilePhone: '+61412345678',
+        accountType: 'personal',
+        organization: ['123'],
       }
       jest.spyOn(userModel,'findByIdAndUpdate').mockReturnValue({
       exec:jest.fn().mockResolvedValue(null),
@@ -139,17 +153,22 @@ describe('UserService', () => {
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
         password: 'zzzz',
-        role: 'normal',
+        role: ['normal'],
         mobilePhone: '+61412345678',
+        accountType: 'personal',
+        organization: ['123'],
       }
       const mockUser:UserResponseDto ={
         id: '123',
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
         password: 'zzzz',
-        role: 'normal',
+        role: ['normal'],
         mobilePhone: '+61412345678',
         refreshToken: null,
+        accountType: 'personal',
+        accessToken: 'accessToken',
+        organization: ['123'],
       }
       jest.spyOn(userModel,'create').mockReturnValue(mockUser as any);
       expect(await userService.createUser(input)).toBe(mockUser);
@@ -159,8 +178,10 @@ describe('UserService', () => {
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
         password: 'zzzz',
-        role: 'normal',
+        role: ['normal'],
         mobilePhone: '+61412345678',
+        accountType: 'personal',
+        organization: ['123'],
       }
       jest.spyOn(userModel,'create').mockReturnValue(null as any);
       await expect(userService.createUser(input)).rejects.toThrow(NotFoundException);

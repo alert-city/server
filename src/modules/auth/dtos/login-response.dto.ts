@@ -1,25 +1,30 @@
-import { Field, ObjectType} from '@nestjs/graphql';
-
-@ObjectType()
-class Name {
-  @Field(()=> String)
-  firstName: string;
-
-  @Field(()=> String)
-  lastName: string;
-}
+import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
+import { UserNameResponseDto } from '@/modules/user/dtos/user-name.dto';
 
 @ObjectType()
 export class LoginResponseDto {
-  @Field(()=> String)
-  message: string;
+  @Field(()=> ID, )
+  id: string;
 
-  @Field(()=> String, )
+  @Field(()=> UserNameResponseDto)
+  name: UserNameResponseDto;
+
+  @Field(()=> String, {nullable: true})
+  username?: string;
+
+  @Field(()=> String)
+  accountType: string;
+
+  @Field(()=> [String])
+  role: string[];
+
+  @Field(()=> [String])
+  organization: string[];
+
+  @Field(()=> String, {nullable: true})
+  mobilePhone?: string;
+
+  @Field(()=> String, {nullable: true})
   accessToken: string;
-
-  @Field(()=> String)
-  role: string;
-
-  @Field(()=> Name)
-  name: Name;
 }
