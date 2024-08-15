@@ -6,8 +6,7 @@ import { UserService } from '@/modules/user/user.service';
 import { LoginResponseDto } from '@/modules/auth/dtos/login-response.dto';
 import { LoginRequestDto } from '@/modules/auth/dtos/login-request.dto';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
-import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
-import { Response } from 'express';
+import  { UpdateFailedException } from '@/common/exceptions/update-failed.exception';
 
 @Injectable()
 export class AuthService {
@@ -20,58 +19,34 @@ export class AuthService {
 
   async login(
     input: LoginRequestDto,
-    context: any,
   ): Promise<LoginResponseDto> {
-    const { username, password, stay_signed_in } = input;
+    const { username, password, isStaySignedIn } = input;
     const user = await this.userService.findUserByUsername(username);
-    // console.log('user', user);
     if (!user) {
       throw new NotFoundException('User not found');
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     const periodOneDay = 1000 * 60 * 60 * 24;
     const periodOneWeek = periodOneDay * 7;
-    const expiresFreshToken = stay_signed_in ? periodOneWeek : periodOneDay;
+    const expiresFreshToken = isStaySignedIn ? periodOneWeek : periodOneDay;
     if (user && isPasswordValid) {
       const accessToken = await this.generateAccessToken(user);
       const refreshToken = this.jwtService.sign({ id: user.id }, { expiresIn: expiresFreshToken });
-      // console.log('refreshToken', refreshToken);
-      // console.log('accessToken', accessToken);
 
-      //set access token into database
-      await this.userService.updateUser(user.id, { refreshToken: refreshToken });
-
-      // set refresh token into httpOnly cookie
-      const response: Response = context.res;
-      response.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: expiresFreshToken,
-      });
+      //set refresh token into database
+      await this.userService.updateUser(user.id, { refreshToken });
 
       return {
-        message: 'login successful',
-        accessToken: accessToken,
-        role: user.role,
+        id: user.id,
+        accessToken,
         name: user.name,
-      };
+        role: user.role,
+        accountType: user.accountType,
+        organization: user.organization,
+        username: user.username,
+       };
     }
   }
-
-  async logout(context: any): Promise<boolean> {
-    const req = context.req;
-    const { id } = await this.tokenService.processToken(req);
-    await this.userService.updateUser(id, { refreshToken: '' });
-    const response: Response = context.res;
-    response.clearCookie('refreshToken',{
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    });
-    return true;
-  }
-
 
   async generateAccessToken(user: UserResponseDto): Promise<string> {
     let accessToken: string;
@@ -80,8 +55,21 @@ export class AuthService {
     } else {
       accessToken = this.jwtService.sign({ id: user.id }, { expiresIn: '30s' });
     }
+    //set access token into database
+    await this.userService.updateUser(user.id, { accessToken });
     return accessToken;
   }
+
+  async revokeTokens(context: any): Promise<boolean> {
+    const req = context.req;
+    const {id} = await this.tokenService.processToken(req);
+    const updatedUser = await this.userService.updateUser(id, { refreshToken: '', accessToken: '' });
+    if (!updatedUser) {
+      throw new UpdateFailedException();
+    }
+    return true;
+  }
+
 
 
 }

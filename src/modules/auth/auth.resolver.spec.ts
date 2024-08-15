@@ -16,7 +16,7 @@ describe('AuthResolver', () => {
           provide: AuthService,
           useValue: {
             login: jest.fn(),
-            logout: jest.fn(),
+            revokeTokens: jest.fn(),
           },
         },
       ],
@@ -29,39 +29,38 @@ describe('AuthResolver', () => {
     expect(resolver).toBeDefined();
   });
 
-  describe('login',()=>{
+  describe('login', () => {
     it('should login succeed', async () => {
       const input: LoginRequestDto = {
-      username: 'jinyuanzhang1992@hotmail.com',
-      password: 'zzzz',
-      stay_signed_in: true,
-      }
-      const context = {
-        res: {
-          cookie: jest.fn(),
-        },
+        username: 'jinyuanzhang1992@hotmail.com',
+        password: 'zzzz',
+        isStaySignedIn: true,
       };
-      const result:LoginResponseDto ={
-        message: 'login successful',
-        accessToken: 'accessToken',
-        role: 'normal',
+      const result: LoginResponseDto = {
+        id: '123',
         name: { firstName: 'John', lastName: 'Doe' },
-      }
-      jest.spyOn(authService,'login').mockResolvedValue(result);
-      expect(await resolver.login(input,context)).toBe(result);
+        username: 'jinyuanzhang1992@hotmail.com',
+        role: ['normal'],
+        mobilePhone: '+61412345678',
+        accessToken: 'accessToken',
+        organization: ['123'],
+        accountType: 'normal',
+      };
+      jest.spyOn(authService, 'login').mockResolvedValue(result);
+      expect(await resolver.login(input)).toBe(result);
     });
-  })
+  });
 
-  describe('logout',()=>{
+  describe('logout', () => {
     it('should return if logout succeed', async () => {
       const context = {
         res: {
           cookie: jest.fn(),
         },
       };
-      const result:boolean = true;
-      jest.spyOn(authService,'logout').mockResolvedValue(result);
-      expect(await resolver.logout(context)).toBe(result);
+      const result: boolean = true;
+      jest.spyOn(authService, 'revokeTokens').mockResolvedValue(result);
+      expect(await resolver.revokeTokens(context)).toBe(result);
     });
-  })
+  });
 });

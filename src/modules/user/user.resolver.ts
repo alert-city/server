@@ -3,8 +3,8 @@ import { UserService } from './user.service';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
 import { createUserSchema, updateUserSchema } from '@/validation/schemas/user/user.schema';
-import { ZodValidationInterceptor } from '@/modules/user/Interceptors/user-validation.interceptor';
-import { UseInterceptors, UseGuards } from '@nestjs/common';
+import { ZodValidationPipe } from '@/modules/user/pipes/zod-validation.pipe';
+import { UseGuards } from '@nestjs/common';
 import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
 import { UpdateUserRequestDto } from '@/modules/user/dtos/user-request.dto';
 
@@ -14,6 +14,7 @@ export class UserResolver {
   }
 
   @Query(() => [UserResponseDto])
+  @UseGuards(CombinedAuthGuard)
   async findAllUsers(): Promise<UserResponseDto[]> {
     return await this.userService.findAllUsers();
   }
@@ -26,17 +27,15 @@ export class UserResolver {
 
 
   @Mutation(() => UserResponseDto)
-  @UseInterceptors(new ZodValidationInterceptor(createUserSchema))
-  async createUser(@Args('input') input: UserRequestDto): Promise<UserResponseDto> {
+  async createUser(@Args('input', new ZodValidationPipe(createUserSchema)) input: UserRequestDto): Promise<UserResponseDto> {
     return await this.userService.createUser(input);
   }
 
   @Mutation(() => UserResponseDto)
-  // @UseGuards(CombinedAuthGuard)
-  @UseInterceptors(new ZodValidationInterceptor(updateUserSchema))
+  @UseGuards(CombinedAuthGuard)
   async updateUser(
     @Args('id') id: string,
-    @Args('input') input: UpdateUserRequestDto): Promise<UserResponseDto> {
+    @Args('input', new ZodValidationPipe(updateUserSchema)) input: UpdateUserRequestDto): Promise<UserResponseDto> {
     return await this.userService.updateUser(id, input);
   }
 

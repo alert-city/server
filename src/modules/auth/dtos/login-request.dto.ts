@@ -1,7 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString, IsNotEmpty, IsMobilePhone, IsEmail } from 'class-validator';
-import { UserNameRequestDto } from '../../user/dtos/user-name.dto';
-import { UserRoleRequestDto } from '../../user/dtos/user-usertype.dto';
+import { IsString, IsNotEmpty, IsEmail } from 'class-validator';
 
 @InputType()
 export class LoginRequestDto {
@@ -18,5 +16,5 @@ export class LoginRequestDto {
 
   @IsNotEmpty()
   @Field(() => Boolean)
-  stay_signed_in: boolean
+  isStaySignedIn: boolean
 }

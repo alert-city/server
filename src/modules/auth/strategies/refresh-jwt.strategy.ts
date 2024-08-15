@@ -3,10 +3,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from '@/modules/user/user.service';
 import { Request } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh-token') {
-  constructor(private readonly userService: UserService) {
+  constructor(
+    private readonly userService: UserService,
+    private readonly configService: ConfigService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => {
         let token = null;
@@ -15,12 +19,12 @@ export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh-
         }
         return token;
       }]),
-      secretOrKey: process.env.JWT_SECRET,
+      secretOrKey: configService.get<string>('JWT_SECRET'),
     });
   }
 
   async validate(payload: any) {
-    const user = await this.userService.findOneUser(payload.sub);
+    const user = await this.userService.findOneUser(payload.id);
     if (!user) {
       throw new UnauthorizedException('User not found');
     }

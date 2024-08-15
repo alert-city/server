@@ -1,7 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsString, IsNotEmpty, IsMobilePhone, IsEmail } from 'class-validator';
 import { UserNameRequestDto } from './user-name.dto';
-import { UserRoleRequestDto } from './user-usertype.dto';
 
 @InputType()
 class BaseUserRequestDto {
@@ -19,7 +18,15 @@ class BaseUserRequestDto {
 
   @IsString()
   @Field(() => String, { nullable: true })
-  role?: string;
+  accountType?: string;
+
+  @IsString()
+  @Field(() => [String], { nullable: true })
+  role?: string[];
+
+  @IsString()
+  @Field(() => [String], { nullable: true })
+  organization?: [string];
 
   @IsMobilePhone()
   @Field(() => String, { nullable: true })
@@ -45,7 +52,16 @@ export class UserRequestDto extends BaseUserRequestDto {
   @IsString()
   @IsNotEmpty()
   @Field(() => String)
-  role: string;
+  accountType: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Field(() => [String])
+  role: string[];
+
+  @IsString()
+  @Field(() => [String],{ nullable: true })
+  organization?: [string];
 
   @IsNotEmpty()
   @IsMobilePhone()
@@ -58,4 +74,7 @@ export class UpdateUserRequestDto extends BaseUserRequestDto {
 @IsString()
 @Field(() => String, { nullable: true })
 refreshToken?: string;
+
+@Field(() => String, { nullable: true })
+accessToken?: string;
 }
