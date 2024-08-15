@@ -62,7 +62,7 @@ After:
 
 
 ## Resolve
-Resolver CP-1
+Resolve CP-1
 
 ## Additional Notes
 <!-- Add any additional information or context that you think is important. -->
