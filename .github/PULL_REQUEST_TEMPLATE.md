@@ -1,6 +1,7 @@
 ## TL;DR
 <!-- Provide a short summary of the changes in this PR. -->
 <!-- Example: Fixes a bug in the authentication logic and improves performance in user queries. -->
+- Implement authLink and responseLink in the apolloClient.ts to add access token and intercept auth status and new access token to localStorage
 
 ## Description
 <!-- Provide a detailed description of the changes made in this PR. -->
@@ -54,6 +55,14 @@ After:
 - [ ] I have added tests that prove my fix is effective or that my feature works.
 - [ ] New and existing unit tests pass locally with my changes.
 - [ ] Any dependent changes have been merged and published in downstream modules.
+
+## Files for Review
+<!-- List the files that you would like to be reviewed. -->
+1. `src/apollo/apolloClient.ts`
+
+
+## Resolve
+Resolver CP-1
 
 ## Additional Notes
 <!-- Add any additional information or context that you think is important. -->
