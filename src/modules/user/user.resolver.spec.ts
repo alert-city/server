@@ -8,7 +8,12 @@ import { AuthService } from '@/modules/auth/auth.service';
 import { TokenService } from '@/modules/auth/token.service';
 import { AccessTokenGuard } from '@/modules/auth/guards/jwt-access-auth.guard';
 import { RefreshTokenGuard } from '@/modules/auth/guards/jwt-refresh-auth.guard';
-import { NotFoundException } from '@nestjs/common';
+import { UserPasswordService } from '@/modules/user/user.password.service';
+import { CustomException } from '@/common/exceptions/user.exception';
+import {
+  DELETE_USER_ERROR
+} from '@/common/constants/code';
+
 
 describe('UserResolver', () => {
   let resolver: UserResolver;
@@ -28,6 +33,14 @@ describe('UserResolver', () => {
             createUser: jest.fn(),
             updateUser: jest.fn(),
             deleteUser: jest.fn(),
+          },
+        },
+        {
+          provide: UserPasswordService,
+          useValue: {
+            resetPassword: jest.fn(),
+            sendVerificationEmail: jest.fn(),
+            generateVerificationCode: jest.fn(),
           },
         },
         {
@@ -90,6 +103,9 @@ describe('UserResolver', () => {
           accessToken: 'accessToken',
           organization: ['123'],
           accountType: 'personal',
+          displayName: 'John Doe',
+          avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
+          staffs: [],
         },
       ];
       jest.spyOn(userService, 'findAllUsers').mockResolvedValue(result);
@@ -110,6 +126,9 @@ describe('UserResolver', () => {
         accessToken: 'accessToken',
         organization: ['123'],
         accountType: 'personal',
+        displayName: 'John Doe',
+        avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
+        staffs: [],
       };
       //定义一个result变量，相当于数据库中的一个用户数据
       jest.spyOn(userService, 'findOneUser').mockResolvedValue(result);
@@ -128,6 +147,8 @@ describe('UserResolver', () => {
         mobilePhone: '+61412345678',
         organization: ['123'],
         accountType: 'personal',
+        displayName: 'John Doe',
+        staffs: ['123'],
       };
       //定义一个input变量，相当于前端传入的用户数据
 
@@ -142,6 +163,9 @@ describe('UserResolver', () => {
         accessToken: 'accessToken',
         organization: ['123'],
         accountType: 'personal',
+        displayName: 'John Doe',
+        avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
+        staffs: [],
       };
       //定义一个result变量，相当于数据库中的一个用户数据
 
@@ -162,6 +186,8 @@ describe('UserResolver', () => {
         mobilePhone: '+61412345678',
         organization: ['123'],
         accountType: 'personal',
+        displayName: 'John Doe',
+        staffs: ['123'],
       };
       const result: UserResponseDto = {
         id: '123',
@@ -174,6 +200,9 @@ describe('UserResolver', () => {
         accessToken: 'accessToken',
         organization: ['123'],
         accountType: 'personal',
+        displayName: 'John Doe',
+        avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
+        staffs: [],
       };
       jest.spyOn(userService, 'updateUser').mockResolvedValue(result);
       expect(await resolver.updateUser(id, input)).toBe(result);
@@ -190,9 +219,9 @@ describe('UserResolver', () => {
     it('should throw NotFoundException if user is not found', async () => {
       const id = '123';
       jest.spyOn(userService, 'deleteUser').mockImplementation(() => {
-        throw new NotFoundException('User not found');
+        throw new CustomException('User not delete', 'DELETE_USER_ERROR', DELETE_USER_ERROR);
       }); // 模拟抛出异常
-      await expect(resolver.deleteUser(id)).rejects.toThrow(NotFoundException);
+      await expect(resolver.deleteUser(id)).rejects.toThrow(CustomException);
     });
   });
 

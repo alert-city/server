@@ -60,6 +60,9 @@ describe('AuthService', () => {
         accessToken: 'accessToken',
         organization: ['123'],
         accountType: 'normal',
+        displayName: 'John Doe',
+        avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
+        staffs: [],
       };
       const mockResponse: LoginResponseDto = {
         id: '123',
@@ -96,6 +99,9 @@ describe('AuthService', () => {
         accessToken: 'accessToken',
         organization: ['123'],
         accountType: 'normal',
+        displayName: 'John Doe',
+        avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
+        staffs: [],
       };
       const contextMock = {
         res: {

@@ -1,23 +1,30 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
-import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
-import { UpdateUserRequestDto } from '@/modules/user/dtos/user-request.dto';
-import * as bcrypt from 'bcryptjs';
-import  { UpdateFailedException } from '@/common/exceptions/update-failed.exception';
+import { UpdateUserRequestDto, VerificationInfoRequestDto, UserRequestDto } from '@/modules/user/dtos/user-request.dto';
+import { UserUtilsService } from '@/modules/user/user-utils.service';
+import { CustomException } from '@/common/exceptions/user.exception';
+import {
+  CREATE_USER_ERROR,
+  UPDATE_ERROR,
+  DELETE_USER_ERROR,
+  ACCOUNT_EXIST,
+  USER_NOT_FOUND
+} from '@/common/constants/code';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel('User') private readonly userModel: Model<UserResponseDto>,
+    private readonly userUtilsService: UserUtilsService,
   ) {
   }
 
   async findAllUsers(): Promise<UserResponseDto[]> {
     const allUsers = await this.userModel.find().exec();
     if (allUsers.length === 0) {
-      throw new UpdateFailedException();
+      throw new CustomException('User not found', 'USER_NOT_FOUND', USER_NOT_FOUND);
     }
     return allUsers;
   }
@@ -25,7 +32,7 @@ export class UserService {
   async findUserByUsername(username: string): Promise<UserResponseDto> {
     const foundUser = await this.userModel.findOne({ username });
     if (!foundUser) {
-      throw new NotFoundException('User not found');
+      throw new CustomException('User not found', 'USER_NOT_FOUND', USER_NOT_FOUND);
     }
     return foundUser;
   }
@@ -35,7 +42,7 @@ export class UserService {
     const foundUser = await this.userModel.findById(id).exec();
     // console.log('foundUser in service', foundUser);
     if (!foundUser) {
-      throw new NotFoundException('User not found');
+      throw new CustomException('User not found', 'USER_NOT_FOUND', USER_NOT_FOUND);
     }
     return foundUser;
   }
@@ -48,17 +55,21 @@ export class UserService {
       new: true,
     }).exec();
     if (!updatedUser) {
-      throw new NotFoundException('User not updated');
+      throw new CustomException('User not updated', 'UPDATE_ERROR', UPDATE_ERROR);
     }
     // console.log('updatedUser', updatedUser);
     return updatedUser;
   }
 
   async createUser(input: UserRequestDto): Promise<UserResponseDto> {
-    input.password = await bcrypt.hash(input.password, 10);
+    const isUsernameTaken = await this.userUtilsService.isUsernameTaken(input.username)
+    if (isUsernameTaken) {
+      throw new CustomException('Username already exists', 'ACCOUNT_EXIST', ACCOUNT_EXIST);
+    }
+    input.password = await this.userUtilsService.hashPassword(input.password);
     const newUser = await this.userModel.create(input);
     if (!newUser) {
-      throw new NotFoundException('User not created');
+      throw new CustomException('User not created', 'CREATE_USER_ERROR', CREATE_USER_ERROR);
     }
     return newUser;
   }
@@ -66,9 +77,22 @@ export class UserService {
   async deleteUser(id: string): Promise<boolean> {
   const deletedUser = await this.userModel.findByIdAndDelete(id).exec();
   if (!deletedUser) {
-    throw new NotFoundException('User not deleted');
+    throw new CustomException('User not deleted', 'DELETE_USER_ERROR', DELETE_USER_ERROR);
   }
   return true;
   }
 
+  async getIdByUsername(username:string):Promise<string> {
+    const foundUser = await this.findUserByUsername(username);
+    if(foundUser.id){
+      return foundUser.id;
+    }
+  }
+
+  async getVerificationInfo(id:string):Promise<VerificationInfoRequestDto> {
+    const foundUser = await this.findOneUser(id);
+    if (foundUser.verificationInfo) {
+      return foundUser.verificationInfo
+    }
+  }
 }

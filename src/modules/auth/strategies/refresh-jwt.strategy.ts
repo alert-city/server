@@ -1,9 +1,13 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UserService } from '@/modules/user/user.service';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
+import { CustomException } from '@/common/exceptions/user.exception';
+import {
+  UNAUTHORIZED
+} from '@/common/constants/code';
 
 @Injectable()
 export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh-token') {
@@ -26,7 +30,7 @@ export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh-
   async validate(payload: any) {
     const user = await this.userService.findOneUser(payload.id);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new CustomException('User not found', 'UNAUTHORIZED', UNAUTHORIZED);
     }
     return user;
   }

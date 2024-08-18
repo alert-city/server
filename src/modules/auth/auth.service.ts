@@ -1,19 +1,25 @@
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { TokenService } from '@/modules/auth/token.service';
 import { UserService } from '@/modules/user/user.service';
 import { LoginResponseDto } from '@/modules/auth/dtos/login-response.dto';
 import { LoginRequestDto } from '@/modules/auth/dtos/login-request.dto';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
-import  { UpdateFailedException } from '@/common/exceptions/update-failed.exception';
+import { CustomException } from '@/common/exceptions/user.exception';
+import {
+  PASSWORD_NOT_MATCH,
+  UPDATE_ERROR,
+  USER_NOT_FOUND,
+} from '@/common/constants/code';
+
 
 @Injectable()
 export class AuthService {
   constructor(
-    private jwtService: JwtService,
-    private userService: UserService,
-    private tokenService: TokenService,
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService,
+    private readonly tokenService: TokenService,
   ) {
   }
 
@@ -23,7 +29,7 @@ export class AuthService {
     const { username, password, isStaySignedIn } = input;
     const user = await this.userService.findUserByUsername(username);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new CustomException('User not found', 'USER_NOT_FOUND', USER_NOT_FOUND);
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     const periodOneDay = 1000 * 60 * 60 * 24;
@@ -45,16 +51,14 @@ export class AuthService {
         organization: user.organization,
         username: user.username,
        };
+    } else if (!isPasswordValid) {
+      throw new CustomException('Password not match', 'PASSWORD_NOT_MATCH', PASSWORD_NOT_MATCH);
     }
   }
 
   async generateAccessToken(user: UserResponseDto): Promise<string> {
     let accessToken: string;
-    if (process.env.NODE_ENV === 'production') {
-      accessToken = this.jwtService.sign({ id: user.id }, { expiresIn: '1h' });
-    } else {
-      accessToken = this.jwtService.sign({ id: user.id }, { expiresIn: '30s' });
-    }
+    accessToken = this.jwtService.sign({ id: user.id }, { expiresIn: '1h' });
     //set access token into database
     await this.userService.updateUser(user.id, { accessToken });
     return accessToken;
@@ -65,7 +69,7 @@ export class AuthService {
     const {id} = await this.tokenService.processToken(req);
     const updatedUser = await this.userService.updateUser(id, { refreshToken: '', accessToken: '' });
     if (!updatedUser) {
-      throw new UpdateFailedException();
+      throw new CustomException('Update user failed', 'UPDATE_ERROR', UPDATE_ERROR);
     }
     return true;
   }

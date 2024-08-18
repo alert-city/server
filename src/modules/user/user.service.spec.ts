@@ -3,9 +3,9 @@ import { UserService } from './user.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
-import { NotFoundException } from '@nestjs/common';
-import { UpdateFailedException } from '@/common/exceptions/update-failed.exception';
 import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
+import { UserUtilsService } from '@/modules/user/user-utils.service';
+import { CustomException } from '@/common/exceptions/user.exception';
 
 describe('UserService', () => {
   let userService: UserService;
@@ -16,6 +16,13 @@ describe('UserService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
+        {
+          provide: UserUtilsService,
+          useValue: {
+            isUsernameTaken: jest.fn(),
+            hashPassword: jest.fn(),
+          },
+        },
         {
           provide: getModelToken('User'),
           useValue: {
@@ -54,6 +61,9 @@ describe('UserService', () => {
           accountType: 'personal',
           accessToken: 'accessToken',
           organization: ['123'],
+          displayName: 'John Doe',
+          avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
+          staffs: [],
         },
       ];
       jest.spyOn(userModel, 'find').mockReturnValue({
@@ -62,11 +72,11 @@ describe('UserService', () => {
       expect(await userService.findAllUsers()).toBe(mockUsers);
     });
 
-    it('should throw UpdateFailedException if no users are found', async () => {
+    it('should throw CustomException if no users are found', async () => {
       jest.spyOn(userModel,'find').mockReturnValue({
       exec:jest.fn().mockResolvedValue([]),
       } as any);
-      await expect(userService.findAllUsers()).rejects.toThrow(UpdateFailedException);
+      await expect(userService.findAllUsers()).rejects.toThrow(CustomException);
     });
   });
 
@@ -84,18 +94,21 @@ describe('UserService', () => {
         accountType: 'personal',
         accessToken: 'accessToken',
         organization: ['123'],
+        displayName: 'John Doe',
+        avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
+        staffs: [],
       }
       jest.spyOn(userModel,'findById').mockReturnValue({
       exec:jest.fn().mockResolvedValue(mockUser),
       } as any);
       expect(await userService.findOneUser(id)).toBe(mockUser);
     });
-    it('should return NotFoundException if no user found', async () => {
+    it('should return CustomException if no user found', async () => {
       const id = '123';
       jest.spyOn(userModel,'findById').mockReturnValue({
       exec:jest.fn().mockResolvedValue(null)
       } as any);
-      await expect(userService.findOneUser(id)).rejects.toThrow(NotFoundException)
+      await expect(userService.findOneUser(id)).rejects.toThrow(CustomException)
     });
   })
 
@@ -110,6 +123,8 @@ describe('UserService', () => {
         mobilePhone: '+61412345678',
         accountType: 'personal',
         organization: ['123'],
+        displayName: 'John Doe',
+        staffs: ['123'],
       }
       const mockUser:UserResponseDto ={
         id: '123',
@@ -122,6 +137,9 @@ describe('UserService', () => {
         accountType: 'personal',
         accessToken: 'accessToken',
         organization: ['123'],
+        displayName: 'John Doe',
+        avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
+        staffs: ['123'],
       }
       jest.spyOn(userModel,'findByIdAndUpdate').mockReturnValue({
       exec:jest.fn().mockResolvedValue(mockUser),
@@ -129,7 +147,7 @@ describe('UserService', () => {
       expect(await userService.updateUser(id,input)).toBe(mockUser);
     });
 
-    it('should return NotFoundException if no user found', async () => {
+    it('should return CustomException if no user found', async () => {
       const id  = '123';
       const input:UserRequestDto ={
         name: { firstName: 'John', lastName: 'Doe' },
@@ -139,11 +157,13 @@ describe('UserService', () => {
         mobilePhone: '+61412345678',
         accountType: 'personal',
         organization: ['123'],
+        displayName: 'John Doe',
+        staffs: ['123'],
       }
       jest.spyOn(userModel,'findByIdAndUpdate').mockReturnValue({
       exec:jest.fn().mockResolvedValue(null),
       } as any);
-      await expect(userService.updateUser(id,input)).rejects.toThrow(NotFoundException);
+      await expect(userService.updateUser(id,input)).rejects.toThrow(CustomException);
     });
   })
 
@@ -157,6 +177,8 @@ describe('UserService', () => {
         mobilePhone: '+61412345678',
         accountType: 'personal',
         organization: ['123'],
+        displayName: 'John Doe',
+        staffs: ['123'],
       }
       const mockUser:UserResponseDto ={
         id: '123',
@@ -169,11 +191,14 @@ describe('UserService', () => {
         accountType: 'personal',
         accessToken: 'accessToken',
         organization: ['123'],
+        displayName: 'John Doe',
+        avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
+        staffs: ['123'],
       }
       jest.spyOn(userModel,'create').mockReturnValue(mockUser as any);
       expect(await userService.createUser(input)).toBe(mockUser);
     });
-    it('should return NotFoundException if create failed', async () => {
+    it('should return CustomException if create failed', async () => {
       const input:UserRequestDto ={
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
@@ -182,9 +207,11 @@ describe('UserService', () => {
         mobilePhone: '+61412345678',
         accountType: 'personal',
         organization: ['123'],
+        displayName: 'John Doe',
+        staffs: ['123'],
       }
       jest.spyOn(userModel,'create').mockReturnValue(null as any);
-      await expect(userService.createUser(input)).rejects.toThrow(NotFoundException);
+      await expect(userService.createUser(input)).rejects.toThrow(CustomException);
     });
     
     describe('deleteUser',()=>{
@@ -196,12 +223,12 @@ describe('UserService', () => {
         } as any);
         expect(await userService.deleteUser(id)).toBe( result);
       });
-      it('should return NotFoundException if delete failed', async() => {
+      it('should return CustomException if delete failed', async() => {
         const id = '123';
         jest.spyOn(userModel,'findByIdAndDelete').mockReturnValue({
         exec:jest.fn().mockResolvedValue(null)
         } as any);
-        await expect(userService.deleteUser(id)).rejects.toThrow(NotFoundException);
+        await expect(userService.deleteUser(id)).rejects.toThrow(CustomException);
       });
 
     })
