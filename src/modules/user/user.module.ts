@@ -6,6 +6,8 @@ import { UserResolver } from '@/modules/user/user.resolver';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UserUtilsService } from '@/modules/user/user-utils.service';
+import { UserPasswordService } from '@/modules/user/user.password.service';
 
 @Module({
   imports: [
@@ -21,8 +23,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
     }),
   ],
-  providers: [UserService, UserResolver],
-  exports: [UserService],
+  providers: [UserService, UserResolver, UserUtilsService, UserPasswordService],
+  exports: [UserService, UserUtilsService],
 
 })
 export class UserModule {}

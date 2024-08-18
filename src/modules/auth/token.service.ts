@@ -1,7 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '@/modules/user/user.service';
 import { Request } from 'express';
+import { CustomException } from '@/common/exceptions/user.exception';
+import {
+  USER_NOT_FOUND
+} from '@/common/constants/code';
 
 export interface RefreshTokenResponse {
   id: string;
@@ -32,14 +36,13 @@ export class TokenService {
       // console.log("id", id);
       const user = await this.userService.findOneUser(id);
       if (!user) {
-        throw new NotFoundException('User not found');
+        throw new CustomException('User not found', 'USER_NOT_FOUND', USER_NOT_FOUND);
       }
       refreshTokenFromDB = user.refreshToken;
       // console.log('refresh token From DB: ', refreshTokenFromDB);
       accessTokenFromDB = user.accessToken;
       req.headers['x-refresh-token'] = refreshTokenFromDB;
       // console.log('refresh token 已经添加到 req 对象中');
-      // console.log('ID 已返回！');
     }
     return { accessTokenFromRequest, accessTokenFromDB, id };
   }

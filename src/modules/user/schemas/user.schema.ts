@@ -26,13 +26,19 @@ export class User {
   password: string;
 
   @Prop({ type: String })
+  displayName: string;
+
+  @Prop({ type: String })
   accountType: string;
 
   @Prop({ type: [String] })
-  role: string[]
+  role: string[];
 
   @Prop({ type: [String] })
-  organization: string[]
+  organization: string[];
+
+  @Prop({ type: [String] })
+  staffs: string[];
 
   @Prop({ type: String })
   mobilePhone: string;
@@ -42,6 +48,18 @@ export class User {
 
   @Prop({ type: String })
   accessToken: string;
+
+  @Prop({ type: String })
+  avatarUrl: string;
+
+  @Prop({
+    type: {
+      code: { type: String },
+      expires: { type: Date },
+      _id: false,
+    },
+  })
+  verificationInfo: Record<string, any>;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

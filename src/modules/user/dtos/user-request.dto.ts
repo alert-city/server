@@ -1,6 +1,18 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString, IsNotEmpty, IsMobilePhone, IsEmail } from 'class-validator';
+import { IsString, IsNotEmpty, IsMobilePhone, IsEmail, IsNumber } from 'class-validator';
 import { UserNameRequestDto } from './user-name.dto';
+
+@InputType()
+export class VerificationInfoRequestDto {
+  @IsString()
+  @Field(() => String)
+  code: string;
+
+  @IsString()
+  @Field(() => Date)
+  expires: Date;
+}
+
 
 @InputType()
 class BaseUserRequestDto {
@@ -18,6 +30,10 @@ class BaseUserRequestDto {
 
   @IsString()
   @Field(() => String, { nullable: true })
+  displayName?: string;
+
+  @IsString()
+  @Field(() => String, { nullable: true })
   accountType?: string;
 
   @IsString()
@@ -28,9 +44,17 @@ class BaseUserRequestDto {
   @Field(() => [String], { nullable: true })
   organization?: [string];
 
+  @IsString()
+  @Field(() => [String], { nullable: true })
+  staffs?: [string];
+
   @IsMobilePhone()
   @Field(() => String, { nullable: true })
   mobilePhone?: string;
+
+  @IsString()
+  @Field(() =>String, { nullable: true })
+  verificationCode?: string;
 }
 
 @InputType()
@@ -52,6 +76,11 @@ export class UserRequestDto extends BaseUserRequestDto {
   @IsString()
   @IsNotEmpty()
   @Field(() => String)
+  displayName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Field(() => String)
   accountType: string;
 
   @IsString()
@@ -60,8 +89,12 @@ export class UserRequestDto extends BaseUserRequestDto {
   role: string[];
 
   @IsString()
-  @Field(() => [String],{ nullable: true })
+  @Field(() => [String], { nullable: true })
   organization?: [string];
+
+  @IsString()
+  @Field(() => [String], { nullable: true })
+  staffs?: [string];
 
   @IsNotEmpty()
   @IsMobilePhone()
@@ -71,10 +104,19 @@ export class UserRequestDto extends BaseUserRequestDto {
 
 @InputType()
 export class UpdateUserRequestDto extends BaseUserRequestDto {
-@IsString()
-@Field(() => String, { nullable: true })
-refreshToken?: string;
+  @IsString()
+  @Field(() => String, { nullable: true })
+  refreshToken?: string;
 
-@Field(() => String, { nullable: true })
-accessToken?: string;
+  @IsString()
+  @Field(() => String, { nullable: true })
+  accessToken?: string;
+
+  @IsString()
+  @Field(() => String, { nullable: true })
+  avatarUrl?: string;
+
+  @IsString()
+  @Field(() =>VerificationInfoRequestDto, { nullable: true })
+  verificationInfo?: VerificationInfoRequestDto;
 }
