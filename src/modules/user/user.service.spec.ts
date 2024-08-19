@@ -32,6 +32,8 @@ describe('UserService', () => {
             findByIdAndUpdate: jest.fn(),
             create: jest.fn(),
             findByIdAndDelete: jest.fn(),
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn(),
           },
         },
       ],
@@ -40,7 +42,7 @@ describe('UserService', () => {
     //useValue:用于模拟User模型的方法
 
     userService = module.get<UserService>(UserService);
-    userModel= module.get<Model<UserResponseDto>>(getModelToken('User'));
+    userModel = module.get<Model<UserResponseDto>>(getModelToken('User'));
   });
 
   it('should be defined', async () => {
@@ -67,23 +69,25 @@ describe('UserService', () => {
         },
       ];
       jest.spyOn(userModel, 'find').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue(mockUsers),
       } as any);
       expect(await userService.findAllUsers()).toBe(mockUsers);
     });
 
     it('should throw CustomException if no users are found', async () => {
-      jest.spyOn(userModel,'find').mockReturnValue({
-      exec:jest.fn().mockResolvedValue([]),
+      jest.spyOn(userModel, 'find').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue([]),
       } as any);
       await expect(userService.findAllUsers()).rejects.toThrow(CustomException);
     });
   });
 
-  describe('findOneUser',()=>{
+  describe('findOneUser', () => {
     it('should return one user', async () => {
       const id = '123';
-      const mockUser:UserResponseDto ={
+      const mockUser: UserResponseDto = {
         id: '123',
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
@@ -97,25 +101,27 @@ describe('UserService', () => {
         displayName: 'John Doe',
         avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
         staffs: [],
-      }
-      jest.spyOn(userModel,'findById').mockReturnValue({
-      exec:jest.fn().mockResolvedValue(mockUser),
+      };
+      jest.spyOn(userModel, 'findById').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue(mockUser),
       } as any);
       expect(await userService.findOneUser(id)).toBe(mockUser);
     });
     it('should return CustomException if no user found', async () => {
       const id = '123';
-      jest.spyOn(userModel,'findById').mockReturnValue({
-      exec:jest.fn().mockResolvedValue(null)
+      jest.spyOn(userModel, 'findById').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue(null),
       } as any);
-      await expect(userService.findOneUser(id)).rejects.toThrow(CustomException)
+      await expect(userService.findOneUser(id)).rejects.toThrow(CustomException);
     });
-  })
+  });
 
-  describe('updateUser',()=>{
+  describe('updateUser', () => {
     it('should update and return a user', async () => {
-      const id  = '123';
-      const input:UserRequestDto ={
+      const id = '123';
+      const input: UserRequestDto = {
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
         password: 'zzzz',
@@ -125,8 +131,8 @@ describe('UserService', () => {
         organization: ['123'],
         displayName: 'John Doe',
         staffs: ['123'],
-      }
-      const mockUser:UserResponseDto ={
+      };
+      const mockUser: UserResponseDto = {
         id: '123',
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
@@ -140,16 +146,17 @@ describe('UserService', () => {
         displayName: 'John Doe',
         avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
         staffs: ['123'],
-      }
-      jest.spyOn(userModel,'findByIdAndUpdate').mockReturnValue({
-      exec:jest.fn().mockResolvedValue(mockUser),
+      };
+      jest.spyOn(userModel, 'findByIdAndUpdate').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue(mockUser),
       } as any);
-      expect(await userService.updateUser(id,input)).toBe(mockUser);
+      expect(await userService.updateUser(id, input)).toBe(mockUser);
     });
 
     it('should return CustomException if no user found', async () => {
-      const id  = '123';
-      const input:UserRequestDto ={
+      const id = '123';
+      const input: UserRequestDto = {
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
         password: 'zzzz',
@@ -159,17 +166,18 @@ describe('UserService', () => {
         organization: ['123'],
         displayName: 'John Doe',
         staffs: ['123'],
-      }
-      jest.spyOn(userModel,'findByIdAndUpdate').mockReturnValue({
-      exec:jest.fn().mockResolvedValue(null),
+      };
+      jest.spyOn(userModel, 'findByIdAndUpdate').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue(null),
       } as any);
-      await expect(userService.updateUser(id,input)).rejects.toThrow(CustomException);
+      await expect(userService.updateUser(id, input)).rejects.toThrow(CustomException);
     });
-  })
+  });
 
-  describe('createUser',()=>{
+  describe('createUser', () => {
     it('should create and return a new user', async () => {
-      const input:UserRequestDto ={
+      const input: UserRequestDto = {
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
         password: 'zzzz',
@@ -179,12 +187,11 @@ describe('UserService', () => {
         organization: ['123'],
         displayName: 'John Doe',
         staffs: ['123'],
-      }
-      const mockUser:UserResponseDto ={
+      };
+      const mockUser = {
         id: '123',
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
-        password: 'zzzz',
         role: ['normal'],
         mobilePhone: '+61412345678',
         refreshToken: null,
@@ -194,12 +201,14 @@ describe('UserService', () => {
         displayName: 'John Doe',
         avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
         staffs: ['123'],
-      }
-      jest.spyOn(userModel,'create').mockReturnValue(mockUser as any);
-      expect(await userService.createUser(input)).toBe(mockUser);
+        toObject: jest.fn().mockReturnThis(),
+      };
+      jest.spyOn(userModel, 'create').mockReturnValue(mockUser as any);
+      // expect(await userService.createUser(input)).toBe(mockUser);
+      expect(await userService.createUser(input)).toEqual(mockUser);
     });
     it('should return CustomException if create failed', async () => {
-      const input:UserRequestDto ={
+      const input: UserRequestDto = {
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
         password: 'zzzz',
@@ -209,31 +218,33 @@ describe('UserService', () => {
         organization: ['123'],
         displayName: 'John Doe',
         staffs: ['123'],
-      }
-      jest.spyOn(userModel,'create').mockReturnValue(null as any);
+      };
+      jest.spyOn(userModel, 'create').mockReturnValue(null as any);
       await expect(userService.createUser(input)).rejects.toThrow(CustomException);
     });
-    
-    describe('deleteUser',()=>{
+
+    describe('deleteUser', () => {
       it('should return if delete succeed', async () => {
         const id = '123';
         const result = true;
-        jest.spyOn(userModel,'findByIdAndDelete').mockReturnValue({
-        exec:jest.fn().mockResolvedValue(true)
+        jest.spyOn(userModel, 'findByIdAndDelete').mockReturnValue({
+          select: jest.fn().mockReturnThis(),
+          exec: jest.fn().mockResolvedValue(true),
         } as any);
-        expect(await userService.deleteUser(id)).toBe( result);
+        expect(await userService.deleteUser(id)).toBe(result);
       });
-      it('should return CustomException if delete failed', async() => {
+      it('should return CustomException if delete failed', async () => {
         const id = '123';
-        jest.spyOn(userModel,'findByIdAndDelete').mockReturnValue({
-        exec:jest.fn().mockResolvedValue(null)
+        jest.spyOn(userModel, 'findByIdAndDelete').mockReturnValue({
+          select: jest.fn().mockReturnThis(),
+          exec: jest.fn().mockResolvedValue(null),
         } as any);
         await expect(userService.deleteUser(id)).rejects.toThrow(CustomException);
       });
 
-    })
+    });
 
-  })
+  });
 
 
 });

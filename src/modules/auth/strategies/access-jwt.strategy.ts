@@ -5,7 +5,8 @@ import { UserService } from '@/modules/user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { CustomException } from '@/common/exceptions/user.exception';
 import {
-  USER_NOT_FOUND
+  USER_NOT_FOUND,
+  ACCESS_TOKEN_VALIDATION_FAILED
 } from '@/common/constants/code';
 
 
@@ -24,7 +25,7 @@ export class AccessJwtStrategy extends PassportStrategy(Strategy, 'jwt-access-to
   async validate(payload: any): Promise<any> {
     const user = await this.userService.findOneUser(payload.id);
     if (!user) {
-      throw new CustomException('User not found', 'USER_NOT_FOUND', USER_NOT_FOUND);
+      throw new CustomException('Access token Validate failed', 'ACCESS_TOKEN_VALIDATION_FAILED', ACCESS_TOKEN_VALIDATION_FAILED);
     }
     return user;
   }

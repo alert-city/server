@@ -24,7 +24,7 @@ import { UserPasswordService } from '@/modules/user/user.password.service';
     }),
   ],
   providers: [UserService, UserResolver, UserUtilsService, UserPasswordService],
-  exports: [UserService, UserUtilsService],
-
+  exports: [UserService, UserUtilsService, MongooseModule],
 })
-export class UserModule {}
+export class UserModule {
+}

@@ -12,6 +12,7 @@ import {
   UPDATE_ERROR,
   USER_NOT_FOUND,
 } from '@/common/constants/code';
+import { UserUtilsService } from '@/modules/user/user-utils.service';
 
 
 @Injectable()
@@ -20,6 +21,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly tokenService: TokenService,
+    private readonly userUtilsService: UserUtilsService,
   ) {
   }
 
@@ -31,7 +33,7 @@ export class AuthService {
     if (!user) {
       throw new CustomException('User not found', 'USER_NOT_FOUND', USER_NOT_FOUND);
     }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await this.userUtilsService.comparePassword(password, user.password);
     const periodOneDay = 1000 * 60 * 60 * 24;
     const periodOneWeek = periodOneDay * 7;
     const expiresFreshToken = isStaySignedIn ? periodOneWeek : periodOneDay;
@@ -50,7 +52,7 @@ export class AuthService {
         accountType: user.accountType,
         organization: user.organization,
         username: user.username,
-       };
+      };
     } else if (!isPasswordValid) {
       throw new CustomException('Password not match', 'PASSWORD_NOT_MATCH', PASSWORD_NOT_MATCH);
     }
@@ -60,20 +62,19 @@ export class AuthService {
     let accessToken: string;
     accessToken = this.jwtService.sign({ id: user.id }, { expiresIn: '1h' });
     //set access token into database
-    await this.userService.updateUser(user.id, { accessToken });
+    await this.userService.updateUser(user.id, { accessToken, verificationInfo: null });
     return accessToken;
   }
 
   async revokeTokens(context: any): Promise<boolean> {
     const req = context.req;
-    const {id} = await this.tokenService.processToken(req);
+    const { id } = await this.tokenService.processToken(req);
     const updatedUser = await this.userService.updateUser(id, { refreshToken: '', accessToken: '' });
     if (!updatedUser) {
       throw new CustomException('Update user failed', 'UPDATE_ERROR', UPDATE_ERROR);
     }
     return true;
   }
-
 
 
 }

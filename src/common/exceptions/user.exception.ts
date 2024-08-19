@@ -7,10 +7,11 @@ export class UpdateFailedException extends HttpException {
 }
 
 export class CustomException extends HttpException {
-  constructor(message: any, code: string, status: number) {
+  constructor(message: any, code: string, status: number, data?: any) {
     super({
       message,
       code,
+      data,
     }, status);
   }
 }

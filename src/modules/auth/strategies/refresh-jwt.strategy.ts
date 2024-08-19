@@ -6,7 +6,8 @@ import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { CustomException } from '@/common/exceptions/user.exception';
 import {
-  UNAUTHORIZED
+  UNAUTHORIZED,
+  REFRESH_TOKEN_VALIDATION_FAILED
 } from '@/common/constants/code';
 
 @Injectable()
@@ -30,7 +31,7 @@ export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh-
   async validate(payload: any) {
     const user = await this.userService.findOneUser(payload.id);
     if (!user) {
-      throw new CustomException('User not found', 'UNAUTHORIZED', UNAUTHORIZED);
+      throw new CustomException('Refresh token validate failed', 'REFRESH_TOKEN_VALIDATION_FAILED', REFRESH_TOKEN_VALIDATION_FAILED);
     }
     return user;
   }

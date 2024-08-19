@@ -30,12 +30,14 @@ export class GqlHttpExceptionFilter implements ExceptionFilter {
       const message = exception.message;
       const status = exception.getStatus();
       const code = response['code'] || 'INTERNAL_SERVER_ERROR';
+      const data = response['data'];
 
       // 如果有自定义信息，使用它；否则使用默认的消息
       throw new ApolloError(message, code, {
         statusCode: status,
-        details: response['message'] || response,
+        message: message,
         code: code,
+        data: data,
       });
     }
   }
