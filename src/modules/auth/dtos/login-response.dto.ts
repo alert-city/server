@@ -7,8 +7,11 @@ export class LoginResponseDto {
   @Field(()=> ID, )
   id: string;
 
-  @Field(()=> UserNameResponseDto)
-  name: UserNameResponseDto;
+  @Field(()=> UserNameResponseDto, {nullable: true})
+  name?: UserNameResponseDto;
+
+  @Field(()=> String, {nullable: true})
+  orgName?: string;
 
   @Field(()=> String, {nullable: true})
   username?: string;
@@ -19,8 +22,11 @@ export class LoginResponseDto {
   @Field(()=> [String])
   role: string[];
 
-  @Field(()=> [String])
-  organization: string[];
+  @Field(()=> [String], {nullable: true})
+  organization?: string[];
+
+  @Field(()=> [String], {nullable: true})
+  staffs?: string[];
 
   @Field(()=> String, {nullable: true})
   mobilePhone?: string;

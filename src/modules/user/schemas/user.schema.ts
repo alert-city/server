@@ -20,6 +20,9 @@ export class User {
   name: Record<string, any>;
 
   @Prop({ type: String })
+  orgName: string;
+
+  @Prop({ type: String })
   username: string;
 
   @Prop({ type: String })
@@ -51,6 +54,9 @@ export class User {
 
   @Prop({ type: String })
   avatarUrl: string;
+
+  @Prop({ type: Number })
+  codeAttempts: number;
 
   @Prop({
     type: {

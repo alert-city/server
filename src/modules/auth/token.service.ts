@@ -6,6 +6,7 @@ import { CustomException } from '@/common/exceptions/user.exception';
 import {
   USER_NOT_FOUND
 } from '@/common/constants/code';
+import { UserUtilsService } from '@/modules/user/user-utils.service';
 
 export interface RefreshTokenResponse {
   id: string;
@@ -17,8 +18,9 @@ export interface RefreshTokenResponse {
 @Injectable()
 export class TokenService {
   constructor(
-    private jwtService: JwtService,
-    private userService: UserService,
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService,
+    private readonly userUtilsService: UserUtilsService,
   ) {
   }
 
@@ -32,6 +34,7 @@ export class TokenService {
     if (authHeader && authHeader.startsWith('Bearer ')) {
       accessTokenFromRequest = authHeader.split(' ')[1];
       const decoded = this.jwtService.decode(accessTokenFromRequest);
+      // console.log("decoded", decoded);
       id = decoded.id;
       // console.log("id", id);
       const user = await this.userService.findOneUser(id);

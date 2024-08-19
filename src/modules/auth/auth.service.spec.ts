@@ -8,6 +8,8 @@ import { LoginRequestDto } from '@/modules/auth/dtos/login-request.dto';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import * as bcrypt from 'bcryptjs';
 import { RefreshTokenResponse } from '@/modules/auth/token.service';
+import { UserUtilsService } from '@/modules/user/user-utils.service';
+import { getModelToken } from '@nestjs/mongoose';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -32,7 +34,21 @@ describe('AuthService', () => {
             sign: jest.fn(),
           },
         },
+        {
+          provide: getModelToken('User'),
+          useValue: {
+            find: jest.fn(),
+            findOne: jest.fn(),
+            findById: jest.fn(),
+            findByIdAndUpdate: jest.fn(),
+            create: jest.fn(),
+            findByIdAndDelete: jest.fn(),
+            select: jest.fn().mockReturnThis(),
+            exec: jest.fn(),
+          },
+        },
         TokenService,
+        UserUtilsService,
       ],
     }).compile();
 
@@ -114,7 +130,6 @@ describe('AuthService', () => {
       jest.spyOn(userService, 'updateUser').mockResolvedValue(mockUser);
       expect(await service.revokeTokens(contextMock)).toBe(result);
     });
-
   });
 
 });

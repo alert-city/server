@@ -10,7 +10,7 @@ import {
   UPDATE_ERROR,
   DELETE_USER_ERROR,
   ACCOUNT_EXIST,
-  USER_NOT_FOUND
+  USER_NOT_FOUND, USER_NOT_EXIST,
 } from '@/common/constants/code';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class UserService {
   }
 
   async findAllUsers(): Promise<UserResponseDto[]> {
-    const allUsers = await this.userModel.find().exec();
+    const allUsers = await this.userModel.find().select('-password').exec();
     if (allUsers.length === 0) {
       throw new CustomException('User not found', 'USER_NOT_FOUND', USER_NOT_FOUND);
     }
@@ -30,16 +30,16 @@ export class UserService {
   }
 
   async findUserByUsername(username: string): Promise<UserResponseDto> {
-    const foundUser = await this.userModel.findOne({ username });
+    const foundUser = await this.userModel.findOne({ username }).exec();
     if (!foundUser) {
-      throw new CustomException('User not found', 'USER_NOT_FOUND', USER_NOT_FOUND);
+      throw new CustomException('User not exist', 'USER_NOT_EXIST', USER_NOT_EXIST);
     }
     return foundUser;
   }
 
   async findOneUser(id: string): Promise<UserResponseDto> {
     // console.log('id in service', id);
-    const foundUser = await this.userModel.findById(id).exec();
+    const foundUser = await this.userModel.findById(id).select('-password').exec();
     // console.log('foundUser in service', foundUser);
     if (!foundUser) {
       throw new CustomException('User not found', 'USER_NOT_FOUND', USER_NOT_FOUND);
@@ -53,7 +53,7 @@ export class UserService {
   ): Promise<UserResponseDto> {
     const updatedUser = await this.userModel.findByIdAndUpdate(id, input, {
       new: true,
-    }).exec();
+    }).select('-password').exec();
     if (!updatedUser) {
       throw new CustomException('User not updated', 'UPDATE_ERROR', UPDATE_ERROR);
     }
@@ -62,6 +62,7 @@ export class UserService {
   }
 
   async createUser(input: UserRequestDto): Promise<UserResponseDto> {
+    delete input.confirmPassword;
     const isUsernameTaken = await this.userUtilsService.isUsernameTaken(input.username)
     if (isUsernameTaken) {
       throw new CustomException('Username already exists', 'ACCOUNT_EXIST', ACCOUNT_EXIST);
@@ -71,11 +72,12 @@ export class UserService {
     if (!newUser) {
       throw new CustomException('User not created', 'CREATE_USER_ERROR', CREATE_USER_ERROR);
     }
-    return newUser;
+    const { password, ...userWithoutPassword } = newUser.toObject();
+    return userWithoutPassword as UserResponseDto;
   }
 
   async deleteUser(id: string): Promise<boolean> {
-  const deletedUser = await this.userModel.findByIdAndDelete(id).exec();
+  const deletedUser = await this.userModel.findByIdAndDelete(id).select('-password').exec();
   if (!deletedUser) {
     throw new CustomException('User not deleted', 'DELETE_USER_ERROR', DELETE_USER_ERROR);
   }

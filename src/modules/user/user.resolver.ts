@@ -1,8 +1,9 @@
 import { Args,Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UserService } from './user.service';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
-import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
+import { UserRequestDto,SendVerificationEmailDto } from '@/modules/user/dtos/user-request.dto';
 import { createUserSchema, updateUserSchema } from '@/validation/schemas/user/user.schema';
+import { getCodeSchema, resetPasswordSchema } from '@/validation/schemas/reset-password/reset-password.schema';
 import { ZodValidationPipe } from '@/modules/user/pipes/zod-validation.pipe';
 import { UseGuards } from '@nestjs/common';
 import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
@@ -51,14 +52,15 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  async sendVerificationEmail(@Args('username') username: string): Promise<boolean> {
+  async sendVerificationEmail(@Args('input', new ZodValidationPipe(getCodeSchema)) input: SendVerificationEmailDto): Promise<boolean> {
+    const { username  } = input;
     return await this.userResetPasswordService.sendVerificationEmail(username);
   }
 
   @Mutation(() => Boolean)
   async resetPassword(
     @Args('username') username: string,
-    @Args('input', new ZodValidationPipe(updateUserSchema)) input: UpdateUserRequestDto,
+    @Args('input', new ZodValidationPipe(resetPasswordSchema)) input: UpdateUserRequestDto,
   ): Promise<boolean> {
     return await this.userResetPasswordService.resetPassword(username, input);
   }
