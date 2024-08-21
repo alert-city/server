@@ -10,6 +10,15 @@ class VerificationInfoResponseDto {
   expires: Date;
 }
 
+@ObjectType()
+export class SecurityQuestionsResponseDto {
+  @Field(() => String)
+  question: string;
+
+  @Field(() => String)
+  answer: string;
+}
+
 
 @ObjectType()
 export class UserResponseDto {
@@ -52,9 +61,30 @@ export class UserResponseDto {
   @Field(()=> String, {nullable: true})
   accessToken?: string;
 
-  @Field(()=> String)
-  avatarUrl: string;
+  @Field(()=> String, {nullable: true})
+  avatarUrl?: string;
 
   @Field(()=> VerificationInfoResponseDto, {nullable: true})
   verificationInfo?: VerificationInfoResponseDto;
+
+  @Field(() => [SecurityQuestionsResponseDto])
+  securityQuestions: SecurityQuestionsResponseDto[];
+
+  @Field(()=> Boolean)
+  is2FAEnabled: boolean;
+
+  @Field(()=> String)
+  twoFASecret: string;
+
+  @Field(()=> Boolean, {nullable: true})
+  isAccountActivated?: boolean;
+}
+
+@ObjectType()
+export class ActivationResponseDto {
+  @Field(()=> String)
+  userId: string;
+
+  @Field(()=> String)
+  activationToken: string;
 }

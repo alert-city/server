@@ -24,6 +24,6 @@ import { GridFsService } from '@/modules/file/file.service';
     UserModule,
   ],
   controllers: [FilesController],
-  providers: [ TokenService, UserService, GridFsService],
+  providers: [ TokenService, GridFsService,],
 })
 export class FileModule {}
