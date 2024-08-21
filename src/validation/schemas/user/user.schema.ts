@@ -6,38 +6,29 @@ export const passwordSchema = z.string()
   .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
   .regex(/\d/, 'Password must contain at least one number');
 
-export const securityQuestionSchema = z.object({
-  question: z.string().min(1, "Security question cannot be empty").max(255),
-  answer: z.string().min(1, "Answer cannot be empty").max(255),
-});
-
-
 export const createUserSchema = z.object({
-  username: z.string().min(1, "Username cannot be empty").max(255).email("Invalid email address"),
+  username: z.string().min(1, "Email cannot be empty").max(255).email("Invalid email address"),
   password: passwordSchema,
   confirmPassword: passwordSchema,
   displayName: z.string().min(1, "Display name cannot be empty").max(255),
-  accountType: z.enum(["Personal", "Organization"]),
+  accountType: z.enum(["personal", "organization"]),
   role: z.array(z.string().min(1, "Role cannot be empty").max(255)),
+  organization: z.array(z.string().min(1, "Organization cannot be empty").max(255)).optional(),
+  staffs: z.array(z.string().min(1, "Staff cannot be empty").max(255)).optional().optional(),
   name: z.object({
-    firstName: z.string().optional(),
-    lastName: z.string().optional(),
+    firstName: z.string().min(1, "First name cannot be empty").max(255).optional(),
+    lastName: z.string().min(1, "Last name cannot be empty").max(255).optional(),
   }).optional(),
-  orgName: z.string().optional(),
+  orgName: z.string().min(1, "Organization name cannot be empty").max(255).optional(),
   mobilePhone: z.string()
     .min(1, "Mobile phone cannot be empty")
     .max(255)
     .regex(/^\+61\d{9}$/, "Mobile phone number must start with +61 and contain 9 digits after the country code"),
-  // securityQuestions: z.object({
-  //   securityQuestion1: securityQuestionSchema,
-  //   securityQuestion2: securityQuestionSchema,
-  //   securityQuestion3: securityQuestionSchema,
-  // }),
-  securityQuestions: z.array(securityQuestionSchema).min(3, "You must provide three security questions."),
 }).refine(data => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
   path: ['confirmPassword'],
-})
+});
+
 
 export const updateUserSchema = z.object({
   username: z.string().min(1, "Email cannot be empty").max(255).email("Invalid email address").optional(),
@@ -57,6 +48,5 @@ export const updateUserSchema = z.object({
     .regex(/^\+61\d{9}$/, "Mobile phone number must start with +61 and contain 9 digits after the country code")
     .optional(),
   verificationCode: z.string().min(1, "Verification code cannot be empty").max(255).optional(),
-  is2FAEnabled: z.boolean().optional(),
 });
 

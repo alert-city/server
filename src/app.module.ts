@@ -13,7 +13,6 @@ import { GridFsService } from './modules/file/file.service';
 import { graphqlUploadExpress } from 'graphql-upload';
 import { FilesController } from './modules/file/file.controller';
 import { FileModule } from './modules/file/file.module';
-import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -24,7 +23,6 @@ import { NotificationModule } from './modules/notification/notification.module';
     DatabaseModule,
     AuthModule,
     FileModule,
-    NotificationModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'), // 自动生成 schema 文件

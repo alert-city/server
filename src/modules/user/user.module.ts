@@ -8,16 +8,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserUtilsService } from '@/modules/user/user-utils.service';
 import { UserPasswordService } from '@/modules/user/user.password.service';
-import { ActivationSchema } from '@/modules/user/schemas/activation.schema';
-import { NotificationModule } from '@/modules/notification/notification.module';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
-    forwardRef(() => NotificationModule),
     MongooseModule.forFeature([
       { name: 'User', schema: UserSchema },
-      { name: 'Activation', schema: ActivationSchema },
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],

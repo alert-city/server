@@ -66,29 +66,6 @@ export class User {
     },
   })
   verificationInfo: Record<string, any>;
-
-  @Prop({
-    type: [{
-      question: String,
-      answer: String,
-    }],
-    _id: false,
-  })
-  securityQuestions: {
-    securityQuestion1: { question: string; answer: string };
-    securityQuestion2: { question: string; answer: string };
-    securityQuestion3: { question: string; answer: string };
-  };
-
-  @Prop({ type: Boolean })
-  is2FAEnabled: boolean;
-
-  @Prop({ type: String })
-  twoFASecret: string;
-
-  @Prop({ type: Boolean })
-  isAccountActivated: boolean;
-
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

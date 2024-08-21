@@ -10,14 +10,6 @@ export class VerificationInfoRequestDto {
   expires: Date;
 }
 
-@InputType()
-export class SecurityQuestionsRequestDto {
-  @Field(() => String)
-  question: string;
-
-  @Field(() => String)
-  answer: string;
-}
 
 @InputType()
 class BaseUserRequestDto {
@@ -56,12 +48,6 @@ class BaseUserRequestDto {
 
   @Field(() =>String, { nullable: true })
   verificationCode?: string;
-
-  @Field(() => [SecurityQuestionsRequestDto], { nullable: true })
-  securityQuestions?: SecurityQuestionsRequestDto[];
-
-  @Field(() => Boolean, { nullable: true })
-  is2FAEnabled?: boolean;
 }
 
 @InputType()
@@ -83,9 +69,6 @@ export class UserRequestDto extends BaseUserRequestDto {
 
   @Field(() => String)
   mobilePhone: string;
-
-  @Field(() => [SecurityQuestionsRequestDto])
-  securityQuestions: SecurityQuestionsRequestDto[];
 }
 
 @InputType()
@@ -101,15 +84,6 @@ export class UpdateUserRequestDto extends BaseUserRequestDto {
 
   @Field(() =>VerificationInfoRequestDto, { nullable: true })
   verificationInfo?: VerificationInfoRequestDto;
-
-  @Field(() => Boolean, { nullable: true })
-  is2FAEnabled?: boolean;
-
-  @Field(() => String, { nullable: true })
-  twoFASecret?: string;
-
-  @Field(() => Boolean, { nullable: true })
-  isAccountActivated?: boolean;
 }
 
 @InputType()
