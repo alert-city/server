@@ -1,15 +1,6 @@
 import { Field, ObjectType, ID} from '@nestjs/graphql';
 import { UserNameResponseDto } from '@/modules/user/dtos/user-name.dto';
 
-@ObjectType()
-class VerificationInfoResponseDto {
-  @Field(()=> String)
-  code: string;
-
-  @Field(()=> Date)
-  expires: Date;
-}
-
 
 @ObjectType()
 export class UserResponseDto {
@@ -52,9 +43,36 @@ export class UserResponseDto {
   @Field(()=> String, {nullable: true})
   accessToken?: string;
 
-  @Field(()=> String)
-  avatarUrl: string;
+  @Field(()=> String, {nullable: true})
+  avatarUrl?: string;
 
-  @Field(()=> VerificationInfoResponseDto, {nullable: true})
-  verificationInfo?: VerificationInfoResponseDto;
+  @Field(()=> Boolean)
+  is2FAEnabled: boolean;
+
+  @Field(()=> String)
+  twoFASecret: string;
+
+  @Field(()=> Boolean, {nullable: true})
+  isAccountActivated?: boolean;
+}
+
+@ObjectType()
+export class AccountActivationResponseDto {
+  @Field(()=> String)
+  userId: string;
+
+  @Field(()=> String)
+  activationToken: string;
+}
+
+@ObjectType()
+export class PasswordResetResponseDto {
+  @Field(()=> String)
+  userId: string;
+
+  @Field(()=> String)
+  verificationCode: string;
+
+  @Field(()=> Date)
+  expires: Date;
 }

@@ -1,15 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { UserNameRequestDto } from './user-name.dto';
 
-@InputType()
-export class VerificationInfoRequestDto {
-  @Field(() => String)
-  code: string;
-
-  @Field(() => Date)
-  expires: Date;
-}
-
 
 @InputType()
 class BaseUserRequestDto {
@@ -48,6 +39,9 @@ class BaseUserRequestDto {
 
   @Field(() =>String, { nullable: true })
   verificationCode?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  is2FAEnabled?: boolean;
 }
 
 @InputType()
@@ -82,8 +76,14 @@ export class UpdateUserRequestDto extends BaseUserRequestDto {
   @Field(() => String, { nullable: true })
   avatarUrl?: string;
 
-  @Field(() =>VerificationInfoRequestDto, { nullable: true })
-  verificationInfo?: VerificationInfoRequestDto;
+  @Field(() => Boolean, { nullable: true })
+  is2FAEnabled?: boolean;
+
+  @Field(() => String, { nullable: true })
+  twoFASecret?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  isAccountActivated?: boolean;
 }
 
 @InputType()

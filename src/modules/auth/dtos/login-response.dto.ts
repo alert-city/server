@@ -34,3 +34,12 @@ export class LoginResponseDto {
   @Field(()=> String, {nullable: true})
   accessToken: string;
 }
+
+@ObjectType()
+export class TwoFADto {
+  @Field(()=> String)
+  secret: string;
+
+  @Field(()=> String)
+  qrCodeUrl: string;
+}

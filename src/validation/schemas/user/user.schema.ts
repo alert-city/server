@@ -7,19 +7,17 @@ export const passwordSchema = z.string()
   .regex(/\d/, 'Password must contain at least one number');
 
 export const createUserSchema = z.object({
-  username: z.string().min(1, "Email cannot be empty").max(255).email("Invalid email address"),
+  username: z.string().min(1, "Username cannot be empty").max(255).email("Invalid email address"),
   password: passwordSchema,
   confirmPassword: passwordSchema,
   displayName: z.string().min(1, "Display name cannot be empty").max(255),
-  accountType: z.enum(["personal", "organization"]),
+  accountType: z.enum(["Personal", "Organization"]),
   role: z.array(z.string().min(1, "Role cannot be empty").max(255)),
-  organization: z.array(z.string().min(1, "Organization cannot be empty").max(255)).optional(),
-  staffs: z.array(z.string().min(1, "Staff cannot be empty").max(255)).optional().optional(),
   name: z.object({
-    firstName: z.string().min(1, "First name cannot be empty").max(255).optional(),
-    lastName: z.string().min(1, "Last name cannot be empty").max(255).optional(),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
   }).optional(),
-  orgName: z.string().min(1, "Organization name cannot be empty").max(255).optional(),
+  orgName: z.string().optional(),
   mobilePhone: z.string()
     .min(1, "Mobile phone cannot be empty")
     .max(255)
@@ -27,8 +25,7 @@ export const createUserSchema = z.object({
 }).refine(data => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
   path: ['confirmPassword'],
-});
-
+})
 
 export const updateUserSchema = z.object({
   username: z.string().min(1, "Email cannot be empty").max(255).email("Invalid email address").optional(),
@@ -48,5 +45,6 @@ export const updateUserSchema = z.object({
     .regex(/^\+61\d{9}$/, "Mobile phone number must start with +61 and contain 9 digits after the country code")
     .optional(),
   verificationCode: z.string().min(1, "Verification code cannot be empty").max(255).optional(),
+  is2FAEnabled: z.boolean().optional(),
 });
 

@@ -25,7 +25,6 @@ export class AccessTokenGuard extends AuthGuard('jwt-access-token') {
     if (err || !user) {
       throw err || new UnauthorizedException();
     }
-    // console.log("accessToken有效");
     return user;
   }
 }
