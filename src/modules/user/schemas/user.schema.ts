@@ -8,6 +8,7 @@ import * as mongoose from 'mongoose';
   discriminatorKey: 'role.userType',
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
+  timestamps: true,
 })
 export class User {
   @Prop({
@@ -58,14 +59,14 @@ export class User {
   @Prop({ type: Number })
   codeAttempts: number;
 
-  @Prop({
-    type: {
-      code: { type: String },
-      expires: { type: Date },
-      _id: false,
-    },
-  })
-  verificationInfo: Record<string, any>;
+  @Prop({ type: Boolean })
+  is2FAEnabled: boolean;
+
+  @Prop({ type: String })
+  twoFASecret: string;
+
+  @Prop({ type: Boolean })
+  isAccountActivated: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

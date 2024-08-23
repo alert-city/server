@@ -23,7 +23,6 @@ export class RefreshTokenGuard extends AuthGuard('jwt-refresh-token') {
     if (err || !user) {
       throw err || new UnauthorizedException('Both tokens are invalid');
     }
-    // console.log("refreshToken有效");
     return user;
   }
 }

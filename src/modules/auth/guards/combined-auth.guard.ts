@@ -51,14 +51,12 @@ export class CombinedAuthGuard implements CanActivate {
         try {
           const canActivate = await this.refreshTokenGuard.canActivate(context);
           if (canActivate) {
-            // console.log('refresh token 验证成功，开始生成新的 access token');
             const user = req.user;
             const newAccessToken = await this.authService.generateAccessToken(user);
             res.setHeader('x-new-access-token', newAccessToken);
             return true;
           }
         } catch (refreshTokenErr) {
-          // console.log('refresh token 无效');
           res.setHeader('x-auth-status', 'invalid');
           throw new CustomException('Both tokens are invalid. Please re-login.', 'FORBIDDEN', FORBIDDEN);
         }

@@ -66,6 +66,7 @@ describe('AuthService', () => {
     it('should login succeed and return a specific object', async () => {
       const hashedPassword = await bcrypt.hash('zzzz', 10);
       const mockUser: UserResponseDto = {
+        is2FAEnabled: false, twoFASecret: '',
         id: '123',
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
@@ -78,7 +79,7 @@ describe('AuthService', () => {
         accountType: 'normal',
         displayName: 'John Doe',
         avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
-        staffs: [],
+        staffs: []
       };
       const mockResponse: LoginResponseDto = {
         id: '123',
@@ -105,6 +106,7 @@ describe('AuthService', () => {
   describe('logout', () => {
     it('should return if logout succeed', async () => {
       const mockUser: UserResponseDto = {
+        is2FAEnabled: false, twoFASecret: '',
         id: '123',
         name: { firstName: 'John', lastName: 'Doe' },
         username: 'jinyuanzhang1992@hotmail.com',
@@ -117,7 +119,7 @@ describe('AuthService', () => {
         accountType: 'normal',
         displayName: 'John Doe',
         avatarUrl: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
-        staffs: [],
+        staffs: []
       };
       const contextMock = {
         res: {

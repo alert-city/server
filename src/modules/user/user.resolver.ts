@@ -1,7 +1,7 @@
-import { Args,Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UserService } from './user.service';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
-import { UserRequestDto,SendVerificationEmailDto } from '@/modules/user/dtos/user-request.dto';
+import { UserRequestDto, SendVerificationEmailDto } from '@/modules/user/dtos/user-request.dto';
 import { createUserSchema, updateUserSchema } from '@/validation/schemas/user/user.schema';
 import { getCodeSchema, resetPasswordSchema } from '@/validation/schemas/reset-password/reset-password.schema';
 import { ZodValidationPipe } from '@/modules/user/pipes/zod-validation.pipe';
@@ -52,8 +52,8 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  async sendVerificationEmail(@Args('input', new ZodValidationPipe(getCodeSchema)) input: SendVerificationEmailDto): Promise<boolean> {
-    const { username  } = input;
+  async sendVerificationEmail(@Args('input', new ZodValidationPipe(getCodeSchema)) input:SendVerificationEmailDto): Promise<boolean> {
+    const { username } = input;
     return await this.userResetPasswordService.sendVerificationEmail(username);
   }
 
@@ -65,4 +65,23 @@ export class UserResolver {
     return await this.userResetPasswordService.resetPassword(username, input);
   }
 
+  @Mutation(() => UserResponseDto)
+  // @UseGuards(CombinedAuthGuard)
+  async updateUserByUsername(
+    @Args('username') username: string,
+    @Args('input', new ZodValidationPipe(updateUserSchema)) input: UpdateUserRequestDto,
+  ): Promise<UserResponseDto> {
+    return await this.userService.updateUserByUsername(username, input);
+  }
+
+  @Mutation(() => Boolean)
+  async activateUserAccount(@Args('token') token: string): Promise<boolean> {
+    return await this.userService.activateUserAccount(token);
+  }
+
+
+  @Mutation(() => Boolean)
+  async resendActivationEmail(@Args('username') username: string): Promise<boolean> {
+    return await this.userService.resendActivationEmail(username);
+  }
 }
