@@ -1,5 +1,4 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import { UserNameResponseDto } from '@/modules/user/dtos/user-name.dto';
 
 @ObjectType()
@@ -33,6 +32,9 @@ export class LoginResponseDto {
 
   @Field(()=> String, {nullable: true})
   accessToken: string;
+
+  @Field(()=> String, {nullable: true})
+  displayName?: string;
 }
 
 @ObjectType()

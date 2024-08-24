@@ -62,6 +62,7 @@ export class AuthService {
         accountType: user.accountType,
         organization: user.organization,
         username: user.username,
+        displayName: user.displayName,
       };
     } else if (!isPasswordValid) {
       throw new CustomException('Password not match', 'PASSWORD_NOT_MATCH', PASSWORD_NOT_MATCH);
