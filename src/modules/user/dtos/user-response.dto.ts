@@ -1,14 +1,15 @@
 import { Field, ObjectType, ID} from '@nestjs/graphql';
-import { UserNameResponseDto } from '@/modules/user/dtos/user-name.dto';
-
 
 @ObjectType()
 export class UserResponseDto {
   @Field(()=> ID)
   id: string;
 
-  @Field(()=> UserNameResponseDto, {nullable: true})
-  name?: UserNameResponseDto;
+  @Field(() => String, {nullable: true})
+  firstName?: string;
+
+  @Field(() => String, {nullable: true})
+  lastName?: string;
 
   @Field(() => String, {nullable: true})
   orgName?: string;
@@ -46,33 +47,16 @@ export class UserResponseDto {
   @Field(()=> String, {nullable: true})
   avatarUrl?: string;
 
-  @Field(()=> Boolean)
-  is2FAEnabled: boolean;
+  @Field(()=> Boolean, {nullable: true})
+  is2FAEnabled?: boolean;
 
-  @Field(()=> String)
-  twoFASecret: string;
+  @Field(()=> String, {nullable: true})
+  twoFASecret?: string;
 
   @Field(()=> Boolean, {nullable: true})
   isAccountActivated?: boolean;
+
+  @Field(()=> Boolean, {nullable: true})
+  isFirstLogin?: boolean;
 }
 
-@ObjectType()
-export class AccountActivationResponseDto {
-  @Field(()=> String)
-  userId: string;
-
-  @Field(()=> String)
-  activationToken: string;
-}
-
-@ObjectType()
-export class PasswordResetResponseDto {
-  @Field(()=> String)
-  userId: string;
-
-  @Field(()=> String)
-  verificationCode: string;
-
-  @Field(()=> Date)
-  expires: Date;
-}

@@ -1,14 +1,9 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-import { UserService } from '@/modules/user/user.service';
+import { UserService } from '@/modules/user/services/user.service';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { CustomException } from '@/common/exceptions/user.exception';
-import {
-  UNAUTHORIZED,
-  REFRESH_TOKEN_VALIDATION_FAILED
-} from '@/common/constants/code';
 
 @Injectable()
 export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh-token') {
@@ -19,8 +14,8 @@ export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh-
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => {
         let token = null;
-        if (req && req.headers['x-refresh-token']) {
-          token = req.headers['x-refresh-token'];
+        if (req && req.headers['Refresh-Token']) {
+          token = req.headers['Refresh-Token'];
         }
         return token;
       }]),
@@ -29,11 +24,7 @@ export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh-
   }
 
   async validate(payload: any) {
-    const user = await this.userService.findOneUser(payload.id);
-    if (!user) {
-      throw new CustomException('Refresh token validate failed', 'REFRESH_TOKEN_VALIDATION_FAILED', REFRESH_TOKEN_VALIDATION_FAILED);
-    }
-    return user;
+    return await this.userService.findOneUser(payload.id);
   }
 }
 

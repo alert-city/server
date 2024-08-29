@@ -4,7 +4,8 @@ export const passwordSchema = z.string()
   .min(6, 'Password must be at least 6 characters')
   .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
   .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-  .regex(/\d/, 'Password must contain at least one number');
+  .regex(/\d/, 'Password must contain at least one number')
+  .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/, 'Password must contain at least one special character (e.g. +-!@#$%^&*)');
 
 export const createUserSchema = z.object({
   username: z.string().min(1, "Username cannot be empty").max(255).email("Invalid email address"),
@@ -13,11 +14,10 @@ export const createUserSchema = z.object({
   displayName: z.string().min(1, "Display name cannot be empty").max(255),
   accountType: z.enum(["Personal", "Organization"]),
   role: z.array(z.string().min(1, "Role cannot be empty").max(255)),
-  name: z.object({
-    firstName: z.string().optional(),
-    lastName: z.string().optional(),
-  }).optional(),
-  orgName: z.string().optional(),
+  firstName: z.string().min(1, "First name cannot be empty").max(255).optional(),
+  lastName: z.string().min(1, "Last name cannot be empty").max(255).optional(),
+  orgName: z.string().min(1, "Organization name cannot be empty").max(255).optional(),
+  emailInfoType: z.union([z.literal(1), z.literal(2)]),
   mobilePhone: z.string()
     .min(1, "Mobile phone cannot be empty")
     .max(255)
@@ -34,17 +34,18 @@ export const updateUserSchema = z.object({
   role: z.array(z.string().min(1, "Role cannot be empty").max(255)).min(1, "Role cannot be empty").optional(),
   organization: z.array(z.string().min(1, "Organization cannot be empty").max(255)).optional(),
   staffs: z.array(z.string().min(1, "Staff cannot be empty").max(255)).optional().optional(),
-  name: z.object({
-    firstName: z.string().min(1, "First name cannot be empty").max(255).optional(),
-    lastName: z.string().min(1, "Last name cannot be empty").max(255).optional(),
-  }).optional(),
+  firstName: z.string().min(1, "First name cannot be empty").max(255).optional(),
+  lastName: z.string().min(1, "Last name cannot be empty").max(255).optional(),
   orgName: z.string().min(1, "Organization name cannot be empty").max(255).optional(),
+  avatarUrl: z.string().min(1, "Avatar URL cannot be empty").optional(),
   mobilePhone: z.string()
     .min(1, "Mobile phone cannot be empty")
     .max(255)
     .regex(/^\+61\d{9}$/, "Mobile phone number must start with +61 and contain 9 digits after the country code")
     .optional(),
-  verificationCode: z.string().min(1, "Verification code cannot be empty").max(255).optional(),
   is2FAEnabled: z.boolean().optional(),
+  twoFASecret: z.string().nullable().optional(),
+  isFirstLogin: z.boolean().optional(),
+  verificationCode: z.string().min(6, 'Verification code must be at least 6 characters').optional(),
 });
 

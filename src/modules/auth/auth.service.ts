@@ -1,8 +1,7 @@
-import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
 import { TokenService } from '@/modules/auth/token.service';
-import { UserService } from '@/modules/user/user.service';
+import { UserService } from '@/modules/user/services/user.service';
 import { LoginResponseDto } from '@/modules/auth/dtos/login-response.dto';
 import { LoginRequestDto } from '@/modules/auth/dtos/login-request.dto';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
@@ -10,24 +9,32 @@ import { TwoFADto } from '@/modules/auth/dtos/login-response.dto';
 import * as crypto from 'crypto';
 import base32 from 'base32.js';
 import * as speakeasy from 'speakeasy';
-import { CustomException } from '@/common/exceptions/user.exception';
-import {
-  PASSWORD_NOT_MATCH,
-  UPDATE_ERROR,
-  USER_NOT_FOUND, INVALID_2FA_CODE, ACCOUNT_NOT_ACTIVATED,
-} from '@/common/constants/code';
-import { UserUtilsService } from '@/modules/user/user-utils.service';
+import { UserUtilsService } from '@/modules/user/services/user-utils.service';
 import { ConfigService } from '@nestjs/config';
+import { ErrorContext } from '@/common/adjustment-strategies/error-context';
+import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified-error.strategy';
+import { I18nService } from '@/modules/i18n/i18n.service';
+
 
 @Injectable()
 export class AuthService {
+  private readonly errorContext: ErrorContext;
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly tokenService: TokenService,
     private readonly userUtilsService: UserUtilsService,
     private readonly configService: ConfigService,
+    private readonly unifiedErrorStrategy: UnifiedErrorStrategyImpl,
+    private readonly i18nService: I18nService,
   ) {
+    this.errorContext = new ErrorContext(this.unifiedErrorStrategy);
+  }
+
+
+  private t(key: string): string {
+    return this.i18nService.getTranslation(key);
   }
 
   async login(
@@ -35,44 +42,34 @@ export class AuthService {
   ): Promise<LoginResponseDto> {
     const { username, password, isStaySignedIn } = input;
     const user = await this.userService.findUserByUsername(username);
-    if (!user) {
-      throw new CustomException('User not found', 'USER_NOT_FOUND', USER_NOT_FOUND);
-    }
-
-    if (!user?.isAccountActivated) {
-      throw new CustomException('Account not activated', 'ACCOUNT_NOT_ACTIVATED', ACCOUNT_NOT_ACTIVATED);
-    }
-
-    const isPasswordValid = await this.userUtilsService.comparePassword(password, user.password);
+    await this.errorContext.execute({ type: 'IS_ACCOUNT_ACTIVATED', singleObj: user, id: user.id });
+    await this.errorContext.execute({ type: 'NORMAL_ACCOUNT_NOT_ALLOWED', singleObj: user });
+    await this.errorContext.execute(
+      { type: 'IS_PASSWORD_VALID', password: { passwordFromFE: password, passwordFromDB: user.password } });
     const periodOneDay = 1000 * 60 * 60 * 24;
     const periodOneWeek = periodOneDay * 7;
     const expiresFreshToken = isStaySignedIn ? periodOneWeek : periodOneDay;
-    if (user && isPasswordValid) {
-      const accessToken = await this.generateAccessToken(user);
-      const refreshToken = this.jwtService.sign({ id: user.id }, { expiresIn: expiresFreshToken });
-
-      //set refresh token into database
-      await this.userService.updateUser(user.id, { refreshToken });
-
-      return {
-        id: user.id,
-        accessToken,
-        name: user.name,
-        role: user.role,
-        accountType: user.accountType,
-        organization: user.organization,
-        username: user.username,
-        displayName: user.displayName,
-      };
-    } else if (!isPasswordValid) {
-      throw new CustomException('Password not match', 'PASSWORD_NOT_MATCH', PASSWORD_NOT_MATCH);
-    }
+    const accessToken = await this.generateAccessToken(user);
+    const refreshToken = this.jwtService.sign({ id: user.id }, { expiresIn: expiresFreshToken });
+    await this.userService.updateUser(user.id, { refreshToken });
+    return {
+      accessToken: accessToken,
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      accountType: user.accountType,
+      organization: user.organization,
+      username: user.username,
+      displayName: user.displayName,
+      avatarUrl: user.avatarUrl,
+      isFirstLogin: user.isFirstLogin,
+    };
   }
 
   async generateAccessToken(user: UserResponseDto): Promise<string> {
     let accessToken: string;
     accessToken = this.jwtService.sign({ id: user.id }, { expiresIn: '1h' });
-    //set access token into database
     await this.userService.updateUser(user.id, { accessToken });
     return accessToken;
   }
@@ -80,32 +77,30 @@ export class AuthService {
   async revokeTokens(context: any): Promise<boolean> {
     const req = context.req;
     const { id } = await this.tokenService.processToken(req);
-    const updatedUser = await this.userService.updateUser(id, { refreshToken: '', accessToken: '' });
-    if (!updatedUser) {
-      throw new CustomException('Update user failed', 'UPDATE_ERROR', UPDATE_ERROR);
-    }
-    return true;
+    return await this.userService.updateUser(id, { refreshToken: '', accessToken: '' });
   }
 
   async generate2FA(
     issuer: string,
-    username: string,
+    id: string,
   ): Promise<TwoFADto> {
+    await this.errorContext.execute({ type: 'ID_VALIDATION', id });
+    const foundUser = await this.userService.findOneUser(id);
     const secretBuffer = crypto.randomBytes(20);
     const company = this.configService.get('COMPANY_NAME');
     const secret = new base32.Encoder({ type: 'rfc4648', lc: true }).write(secretBuffer).finalize();
-    const totpURI = `otpauth://totp/${company}:${username}?secret=${secret}&issuer=${issuer}`;
+    const totpURI = `otpauth://totp/${company}:${foundUser.username}?secret=${secret}&issuer=${issuer}`;
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(totpURI)}`;
-    const id = await this.userService.getIdByUsername(username);
     await this.userService.updateUser(id, { twoFASecret: secret });
     return { secret, qrCodeUrl };
   }
 
   async verify2FACode(
-    username: string,
+    id: string,
     code: string,
   ): Promise<boolean> {
-    const foundUser = await this.userService.findUserByUsername(username);
+    await this.errorContext.execute({ type: 'ID_VALIDATION', id });
+    const foundUser = await this.userService.findOneUser(id);
     const secret = foundUser.twoFASecret;
     const verified = speakeasy.totp.verify({
       secret,
@@ -113,11 +108,8 @@ export class AuthService {
       token: code,
       window: 3, // 可选，允许的时间偏移窗口，通常是1
     });
-
-    if (!verified) {
-      throw new CustomException('Invalid 2FA code', 'INVALID_2FA_CODE', INVALID_2FA_CODE);
-    }
+    await this.errorContext.execute(
+      { type: 'TRUE_OR_FALSE', trueOrFalse: verified, message: this.t('invalid2FACode') });
     return verified;
   }
-
 }

@@ -4,8 +4,8 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
-import { UserUtilsService } from '@/modules/user/user-utils.service';
-import { CustomException } from '@/common/exceptions/user.exception';
+import { UserUtilsService } from '@/modules/user/services/user-utils.service';
+import { CustomException } from '@/common/exceptions/custom-exception';
 
 describe('UserService', () => {
   let userService: UserService;
