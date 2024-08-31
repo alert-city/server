@@ -1,11 +1,12 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { UserNameRequestDto } from './user-name.dto';
-
 
 @InputType()
 class BaseUserRequestDto {
-  @Field(() => UserNameRequestDto, { nullable: true })
-  name?: UserNameRequestDto;
+  @Field(() => String, { nullable: true })
+  firstName?: string;
+
+  @Field(() => String, { nullable: true })
+  lastName?: string;
 
   @Field(() => String, { nullable: true })
   orgName?: string;
@@ -37,7 +38,7 @@ class BaseUserRequestDto {
   @Field(() => String, { nullable: true })
   mobilePhone?: string;
 
-  @Field(() =>String, { nullable: true })
+  @Field(() => String, { nullable: true })
   verificationCode?: string;
 
   @Field(() => Boolean, { nullable: true })
@@ -63,10 +64,16 @@ export class UserRequestDto extends BaseUserRequestDto {
 
   @Field(() => String)
   mobilePhone: string;
+
+  @Field(() => Number)
+  emailInfoType: number;
 }
 
 @InputType()
 export class UpdateUserRequestDto extends BaseUserRequestDto {
+  @Field(() => String, { nullable: true })
+  username?: string;
+
   @Field(() => String, { nullable: true })
   refreshToken?: string;
 
@@ -84,10 +91,8 @@ export class UpdateUserRequestDto extends BaseUserRequestDto {
 
   @Field(() => Boolean, { nullable: true })
   isAccountActivated?: boolean;
+
+  @Field(() => String, { nullable: true })
+  verificationCode?: string;
 }
 
-@InputType()
-export class SendVerificationEmailDto {
-  @Field(() => String)
-  username: string;
-}

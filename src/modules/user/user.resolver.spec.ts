@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserResolver } from './user.resolver';
-import { UserService } from './user.service';
+import { UserService } from './services/user.service';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
 import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
@@ -8,7 +8,7 @@ import { AuthService } from '@/modules/auth/auth.service';
 import { TokenService } from '@/modules/auth/token.service';
 import { AccessTokenGuard } from '@/modules/auth/guards/jwt-access-auth.guard';
 import { RefreshTokenGuard } from '@/modules/auth/guards/jwt-refresh-auth.guard';
-import { UserPasswordService } from '@/modules/user/user.password.service';
+import { UserPasswordService } from '@/modules/user/services/user.password.service';
 import { CustomException } from '@/common/exceptions/user.exception';
 import {
   DELETE_USER_ERROR

@@ -7,7 +7,7 @@ import * as mongoose from 'mongoose';
   toObject: { virtuals: true },
   timestamps: true,
 })
-export class PasswordReset {
+export class EmailCodeValidation {
   @Prop({ type: String })
   userId: string;
 
@@ -18,5 +18,5 @@ export class PasswordReset {
   expires: Date;
 }
 
-export const PasswordResetSchema = SchemaFactory.createForClass(PasswordReset);
+export const EmailCodeValidationSchema = SchemaFactory.createForClass(EmailCodeValidation);
 

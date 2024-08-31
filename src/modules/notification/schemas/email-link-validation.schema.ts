@@ -5,13 +5,16 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
   toObject: { virtuals: true },
   timestamps: true,
 })
-export class AccountActivation {
+export class EmailLinkValidation {
   @Prop({ type: String })
   userId: string;
 
   @Prop({ type: String })
   activationToken: string;
+
+  @Prop({ type: String })
+  newUsername: string;
 }
 
-export const AccountActivationSchema = SchemaFactory.createForClass(AccountActivation);
+export const EmailLinkValidationSchema = SchemaFactory.createForClass(EmailLinkValidation);
 

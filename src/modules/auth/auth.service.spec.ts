@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
-import { UserService } from '@/modules/user/user.service';
+import { UserService } from '@/modules/user/services/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { TokenService } from '@/modules/auth/token.service';
 import { LoginResponseDto } from '@/modules/auth/dtos/login-response.dto';
@@ -8,7 +8,7 @@ import { LoginRequestDto } from '@/modules/auth/dtos/login-request.dto';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import * as bcrypt from 'bcryptjs';
 import { RefreshTokenResponse } from '@/modules/auth/token.service';
-import { UserUtilsService } from '@/modules/user/user-utils.service';
+import { UserUtilsService } from '@/modules/user/services/user-utils.service';
 import { getModelToken } from '@nestjs/mongoose';
 
 describe('AuthService', () => {

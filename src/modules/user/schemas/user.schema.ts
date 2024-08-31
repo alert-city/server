@@ -11,14 +11,11 @@ import * as mongoose from 'mongoose';
   timestamps: true,
 })
 export class User {
-  @Prop({
-    type: {
-      firstName: { type: String },
-      lastName: { type: String },
-      _id: false,
-    },
-  })
-  name: Record<string, any>;
+  @Prop({ type: String })
+  firstName: string;
+
+  @Prop({ type: String })
+  lastName: string;
 
   @Prop({ type: String })
   orgName: string;

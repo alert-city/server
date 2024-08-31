@@ -10,7 +10,7 @@ import { AccessTokenGuard } from '@/modules/auth/guards/jwt-access-auth.guard';
 import { RefreshTokenGuard } from '@/modules/auth/guards/jwt-refresh-auth.guard';
 import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
 import { AccessJwtStrategy }  from './strategies/access-jwt.strategy';
-import { UserUtilsService } from '@/modules/user/user-utils.service';
+import { UserUtilsService } from '@/modules/user/services/user-utils.service';
 
 
 @Module({
