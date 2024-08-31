@@ -2,7 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TokenService } from '@/modules/auth/token.service';
-import  { UserService } from '@/modules/user/user.service';
+import  { UserService } from '@/modules/user/services/user.service';
 import { JwtModule } from '@nestjs/jwt';
 import { User, UserSchema } from '@/modules/user/schemas/user.schema';
 import { UserModule } from '@/modules/user/user.module';

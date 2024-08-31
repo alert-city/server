@@ -5,7 +5,6 @@ import { ApolloError } from 'apollo-server-express';
 @Catch(HttpException)
 export class GqlHttpExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
-    // 检查请求类型
     const ctxType = host.getType();
 
     if (ctxType === 'http') {

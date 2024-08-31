@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UpdateUserRequestDto } from '@/modules/user/dtos/user-request.dto';
 import { UserService } from './user.service';
 import { CustomException } from '@/common/exceptions/user.exception';
-import { UserUtilsService } from '@/modules/user/user-utils.service';
+import { UserUtilsService } from '@/modules/user/services/user-utils.service';
 import {
   VERIFICATION_CODE_EXPIRED,
   VERIFICATION_CODE_NOT_MATCH,
@@ -10,23 +10,17 @@ import {
   UPDATE_ERROR,
   SAME_PASSWORD,
 } from '@/common/constants/code';
-import { NotificationService } from '@/modules/notification/notification.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { PasswordResetResponseDto } from '@/modules/user/dtos/user-response.dto';
+import { EmailCodeValidationResponseDto } from '@/modules/notification/dtos/notification-response.dto';
 
 @Injectable()
 export class UserPasswordService {
   constructor(
     private readonly userService: UserService,
     private readonly userUtilsService: UserUtilsService,
-    private readonly notificationService: NotificationService,
-    @InjectModel('PasswordReset') private readonly passwordResetModel: Model<PasswordResetResponseDto>,
+    @InjectModel('EmailCodeValidation') private readonly EmailCodeValidationModel: Model<EmailCodeValidationResponseDto>,
   ) {}
-
-  async sendVerificationEmail(username: string): Promise<boolean> {
-    return await this.notificationService.sendPasswordResetEmail(username);
-  }
 
   async resetPassword(
     username: string,
@@ -34,7 +28,7 @@ export class UserPasswordService {
   ): Promise<boolean> {
     const user = await this.userService.findUserByUsername(username);
     const id = user.id;
-    const records = await this.passwordResetModel.find({ userId: id }).sort({ createdAt: -1 }).exec();
+    const records = await this.EmailCodeValidationModel.find({ userId: id }).sort({ createdAt: -1 }).exec();
     const latestRecord = records[0];
     const passwordStored = user.password;
     const isPasswordSame = await this.userUtilsService.comparePassword(input.password, passwordStored);
@@ -47,6 +41,7 @@ export class UserPasswordService {
     const { verificationCode, expires } = latestRecord;
     const now = new Date();
 
+    input.verificationCode = input.verificationCode.trim();
     if (input.verificationCode !== verificationCode) {
       throw new CustomException('Verification code is not match', 'VERIFICATION_CODE_NOT_MATCH', VERIFICATION_CODE_NOT_MATCH);
     } else if (expires < now) {
@@ -54,17 +49,12 @@ export class UserPasswordService {
     }
 
     input.password = await this.userUtilsService.hashPassword(input.password);
-    input.verificationCode = input.verificationCode.trim();
-
-    const updatedUser = await this.userService.updateUser(id, input);
+    const updatedUser = await this.userService.updateUser(id, { password: input.password });
     if (!updatedUser) {
       throw new CustomException('User not updated', 'UPDATE_ERROR', UPDATE_ERROR);
     }
-    await this.passwordResetModel.deleteMany({ userId: id });
+    await this.EmailCodeValidationModel.deleteMany({ userId: id });
     return true;
   }
 
-  private generateVerificationCode(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-  }
 }

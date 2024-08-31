@@ -19,6 +19,7 @@ export const VALIDATE_ERROR = 2001;
 export const ACCOUNT_NOT_EXIST = 3000;
 export const ACCOUNT_EXIST = 3001;
 export const ACCOUNT_NOT_ACTIVATED = 3002;
+export const ID_INCORRECT = 3003;
 
 // User Errors
 export const USER_NOT_FOUND = 4000;
@@ -26,6 +27,8 @@ export const CREATE_USER_ERROR = 4001;
 export const DELETE_USER_ERROR = 4002;
 export const USER_NOT_EXIST = 4003;
 export const RETRIEVE_USER_ERROR = 4004;
+export const SAME_USERNAME = 4005;
+export const USERNAME_TAKEN = 4006;
 
 // Login Errors
 export const LOGIN_ERROR = 5000;
@@ -43,7 +46,6 @@ export const VERIFICATION_CODE_EXPIRED = 8000;
 export const VERIFICATION_CODE_NOT_MATCH = 8001;
 export const VERIFICATION_CODE_INVALID = 8002;
 export const INVALID_2FA_CODE = 8003;
-
 
 // Update Errors
 export const UPDATE_ERROR = 9000;

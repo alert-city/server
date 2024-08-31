@@ -3,15 +3,16 @@ import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { GridFSBucket, ObjectId } from 'mongodb';
 import { ReadStream } from 'fs';
-import { UserService } from '@/modules/user/user.service';
+import { UserService } from '@/modules/user/services/user.service';
 import { TokenService } from '@/modules/auth/token.service';
 import { ConfigService } from '@nestjs/config';
+import { Readable } from 'stream';
 
 export interface FileUpload {
+  createReadStream: () => Readable; // 将 ReadStream 修改为 Readable
   filename: string;
   mimetype: string;
   encoding: string;
-  createReadStream: () => ReadStream;
 }
 
 @Injectable()
@@ -34,26 +35,27 @@ export class GridFsService {
 
   async uploadFile(
     file: FileUpload,
-    context: any,
+    req: any,
   ): Promise<any> {
     const { createReadStream, filename } = file;
     const uploadStream = this.gridFsBucket.openUploadStream(filename);
     createReadStream().pipe(uploadStream);
 
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    const frontendUrl = this.configService.get<string>('BACKEND_URL');
     const fileId = uploadStream.id;
     const fileUrl = `${frontendUrl}/files/${fileId}`;
-    const req = context.req;
     const { id } = await this.tokenService.processToken(req);
-
     await this.userService.updateUser(id, { avatarUrl: fileUrl });
-
     return new Promise((
       resolve,
       reject,
     ) => {
-      uploadStream.on('finish', () => resolve({ _id: uploadStream.id, filename }));
-      uploadStream.on('error', reject);
+      uploadStream.on('finish', async () => {
+        resolve({ _id: uploadStream.id, filename, fileUrl });
+      })
+        .on('error', (error) => {
+          reject(error);
+        });
     });
   }
 
@@ -61,10 +63,21 @@ export class GridFsService {
     return this.gridFsBucket.openDownloadStream(new ObjectId(fileId));
   }
 
-  async deleteFile(id:string, fileId: string): Promise<any> {
-    await this.gridFsBucket.delete(new ObjectId(fileId));
-    await this.userService.updateUser(id, { avatarUrl: '' });
-    return true;
+  async deleteFile(id: string, fileId: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        resolve(false);
+      }, 10000);
+      this.gridFsBucket.delete(new ObjectId(fileId))
+        .then(() => {
+          clearTimeout(timeoutId);
+          resolve(true);
+        })
+        .catch((error) => {
+          clearTimeout(timeoutId);
+          resolve(true);
+        });
+    });
   }
 
 }

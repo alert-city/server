@@ -1,16 +1,14 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserSchema } from '@/modules/user/schemas/user.schema';
-import { UserService } from './user.service';
+import { UserService } from './services/user.service';
 import { UserResolver } from '@/modules/user/user.resolver';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UserUtilsService } from '@/modules/user/user-utils.service';
-import { UserPasswordService } from '@/modules/user/user.password.service';
-import { AccountActivationSchema } from '@/modules/user/schemas/account-activation.schema';
+import { UserUtilsService } from '@/modules/user/services/user-utils.service';
+import { UserPasswordService } from '@/modules/user/services/user.password.service';
 import { NotificationModule } from '@/modules/notification/notification.module';
-import { PasswordResetSchema } from '@/modules/user/schemas/password-reset.schema';
 
 @Module({
   imports: [
@@ -18,8 +16,6 @@ import { PasswordResetSchema } from '@/modules/user/schemas/password-reset.schem
     forwardRef(() => NotificationModule),
     MongooseModule.forFeature([
       { name: 'User', schema: UserSchema },
-      { name: 'AccountActivation', schema: AccountActivationSchema },
-      { name: 'PasswordReset', schema: PasswordResetSchema },
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],

@@ -1,9 +1,11 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { AccountActivationResponseDto, UserResponseDto } from '@/modules/user/dtos/user-response.dto';
+import { Types } from 'mongoose';
+import { EmailLinkValidationResponseDto } from '@/modules/notification/dtos/notification-response.dto';
+import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import { UpdateUserRequestDto, UserRequestDto } from '@/modules/user/dtos/user-request.dto';
-import { UserUtilsService } from '@/modules/user/user-utils.service';
+import { UserUtilsService } from '@/modules/user/services/user-utils.service';
 import { CustomException } from '@/common/exceptions/user.exception';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -15,14 +17,17 @@ import {
   TOKEN_NOT_FOUND,
   UPDATE_ERROR,
   USER_NOT_FOUND,
+  SAME_USERNAME,
+  ID_INCORRECT,
 } from '@/common/constants/code';
 import { NotificationService } from '@/modules/notification/notification.service';
+import { SendUpdateUsernameEmailRequestDto } from '@/modules/notification/dtos/notification-request.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel('User') private readonly userModel: Model<UserResponseDto>,
-    @InjectModel('AccountActivation') private readonly activationModel: Model<AccountActivationResponseDto>,
+    @InjectModel('EmailLinkValidation') private readonly emailLinkValidationModel: Model<EmailLinkValidationResponseDto>,
     private readonly userUtilsService: UserUtilsService,
     private readonly configService: ConfigService,
     @Inject(forwardRef(() => NotificationService)) private readonly notificationService: NotificationService,
@@ -59,7 +64,6 @@ export class UserService {
     if (!updatedUser) {
       throw new CustomException('User not updated', 'UPDATE_ERROR', UPDATE_ERROR);
     }
-    // console.log('updatedUser', updatedUser);
     return updatedUser;
   }
 
@@ -67,6 +71,15 @@ export class UserService {
     username: string,
     input: UpdateUserRequestDto,
   ): Promise<UserResponseDto> {
+
+    const orgName = input.orgName;
+    if (orgName) {
+      const isOrganizationExist = await this.userUtilsService.isOrgExist(orgName);
+      if (isOrganizationExist) {
+        throw new CustomException('Organization already exists', 'ORGANIZATION_EXIST', ORGANIZATION_EXIST);
+      }
+    }
+
     const updatedUser = await this.userModel.findOneAndUpdate(
       { username },
       input,
@@ -101,7 +114,8 @@ export class UserService {
     if (!newUser) {
       throw new CustomException('User not created', 'CREATE_USER_ERROR', CREATE_USER_ERROR);
     }
-    const result = await this.notificationService.sendAccountActivationEmail(newUser);
+    const { emailInfoType } = input;
+    const result = await this.notificationService.sendActivationLinkEmail(newUser, emailInfoType);
 
     if (result) {
       await this.updateUser(newUser.id, { isAccountActivated: false });
@@ -112,6 +126,13 @@ export class UserService {
   }
 
   async deleteUser(id: string): Promise<boolean> {
+    console.log('开始删除用户');
+    console.log('id', id);
+
+    if (!Types.ObjectId.isValid(id)) {
+      throw new CustomException('Invalid User ID', 'ID_NOT_CORRECT', ID_INCORRECT);
+    }
+
     const deletedUser = await this.userModel.findByIdAndDelete(id).select('-password').exec();
     if (!deletedUser) {
       throw new CustomException('User not deleted', 'DELETE_USER_ERROR', DELETE_USER_ERROR);
@@ -126,9 +147,19 @@ export class UserService {
     }
   }
 
-  async activateUserAccount(token: string): Promise<boolean> {
+  async sendVerificationCodeEmail(
+    username: string,
+    emailInfoType: number,
+  ): Promise<boolean> {
+    return await this.notificationService.sendVerificationCodeEmail(username, emailInfoType);
+  }
+
+  async validateEmailLink(
+    token: string,
+    emailInfoType: number,
+  ): Promise<boolean> {
     const userId = await this.userUtilsService.getIdFromToken(token);
-    const records = await this.activationModel.find({ userId: userId }).sort({ createdAt: -1 }).exec();
+    const records = await this.emailLinkValidationModel.find({ userId: userId }).sort({ createdAt: -1 }).exec();
     if (!records) {
       throw new CustomException('Token not found', 'TOKEN_NOT_FOUND', TOKEN_NOT_FOUND);
     }
@@ -136,22 +167,54 @@ export class UserService {
     if (!latestRecord) {
       throw new CustomException('Token not found', 'TOKEN_NOT_FOUND', TOKEN_NOT_FOUND);
     }
-    const activationToken = latestRecord.activationToken
+    const activationToken = latestRecord.activationToken;
     const ActivationTokenId = latestRecord.id;
     const isTokenValid = await this.userUtilsService.verifyToken(token, activationToken);
     if (!isTokenValid) {
       return false;
     }
-    await this.userModel.findByIdAndUpdate(userId, { isAccountActivated: true }).exec();
-    await this.activationModel.findByIdAndDelete(ActivationTokenId).exec();
+
+    if (emailInfoType === 1) {
+      await this.userModel.findByIdAndUpdate(userId, { isAccountActivated: true }).exec();
+    }
+    if (emailInfoType === 2) {
+      const newUsername = latestRecord.newUsername;
+      await this.userModel.findByIdAndUpdate(userId, { username: newUsername }).exec();
+    }
+
+    await this.emailLinkValidationModel.findByIdAndDelete(ActivationTokenId).exec();
     return true;
   }
 
-  async resendActivationEmail(username: string): Promise<boolean> {
+  async resendActivationLinkEmail(
+    username: string,
+    emailInfoType: number,
+    newUsername?: string,
+  ): Promise<boolean> {
     const foundUser = await this.findUserByUsername(username);
     if (!foundUser) {
-      throw  new CustomException('Failed to retrieve user information', 'RETRIEVE_USER_ERROR', RETRIEVE_USER_ERROR);
+      throw new CustomException('Failed to retrieve user information', 'RETRIEVE_USER_ERROR', RETRIEVE_USER_ERROR);
     }
-    return await this.notificationService.sendAccountActivationEmail(foundUser);
+    return await this.notificationService.sendActivationLinkEmail(foundUser, emailInfoType, newUsername);
   }
+
+  async sendUpdateUsernameEmail(
+    username: string,
+    input: SendUpdateUsernameEmailRequestDto,
+  ): Promise<boolean> {
+    const { newUsername, emailInfoType } = input;
+    const user = await this.findUserByUsername(username);
+
+    if (newUsername === user.username) {
+      throw new CustomException('The new username cannot be the same as the current username', 'SAME_USERNAME', SAME_USERNAME);
+    }
+
+    const isUsernameTaken = await this.userUtilsService.isUsernameTaken(newUsername);
+    if (isUsernameTaken) {
+      throw new CustomException('Username already exists', 'ACCOUNT_EXIST', ACCOUNT_EXIST);
+    }
+
+    return await this.notificationService.sendActivationLinkEmail(user, emailInfoType, newUsername);
+  }
+
 }
