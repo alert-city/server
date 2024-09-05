@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -11,16 +11,11 @@ import { APP_FILTER } from '@nestjs/core';
 import { GridFsService } from './modules/file/file.service';
 import { FileModule } from './modules/file/file.module';
 import { NotificationModule } from './modules/notification/notification.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
+import { I18nModule } from '@/modules/i18n/i18n.module';
+import { LocaleMiddleware } from '@/modules/i18n/localeMiddleware';
 
 @Module({
   imports: [
-    ServeStaticModule.forRoot({
-      serveStaticOptions: {
-        cacheControl: true,
-        maxAge: '7d',
-      },
-    }),
     ConfigModule.forRoot({
       envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
       isGlobal: true,
@@ -29,6 +24,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     AuthModule,
     FileModule,
     NotificationModule,
+    I18nModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
@@ -53,4 +49,11 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     GridFsService,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LocaleMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+
+}

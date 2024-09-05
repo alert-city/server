@@ -9,7 +9,7 @@ import { TokenService } from '@/modules/auth/token.service';
 import { AccessTokenGuard } from '@/modules/auth/guards/jwt-access-auth.guard';
 import { RefreshTokenGuard } from '@/modules/auth/guards/jwt-refresh-auth.guard';
 import { UserPasswordService } from '@/modules/user/services/user.password.service';
-import { CustomException } from '@/common/exceptions/user.exception';
+import { CustomException } from '@/common/exceptions/custom-exception';
 import {
   DELETE_USER_ERROR
 } from '@/common/constants/code';

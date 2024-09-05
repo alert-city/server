@@ -64,6 +64,9 @@ export class User {
 
   @Prop({ type: Boolean })
   isAccountActivated: boolean;
+
+  @Prop({ type: Boolean })
+  isFirstLogin: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

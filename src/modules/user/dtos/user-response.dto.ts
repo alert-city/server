@@ -55,5 +55,8 @@ export class UserResponseDto {
 
   @Field(()=> Boolean, {nullable: true})
   isAccountActivated?: boolean;
+
+  @Field(()=> Boolean, {nullable: true})
+  isFirstLogin?: boolean;
 }
 

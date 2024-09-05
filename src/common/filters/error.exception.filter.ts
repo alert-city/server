@@ -8,12 +8,15 @@ export class GqlHttpExceptionFilter implements ExceptionFilter {
     const ctxType = host.getType();
 
     if (ctxType === 'http') {
-      // 如果是 HTTP 请求，处理 HTTP 响应
       const ctx = host.switchToHttp();
       const response = ctx.getResponse();
       const status = exception.getStatus();
-      const message = exception.message || 'Internal server error';
-      const code = exception.getResponse()['code'] || 'INTERNAL_SERVER_ERROR';
+      const exceptionResponse = exception.getResponse() as any;
+      const message = exceptionResponse?.message || 'Internal server error';
+      const code = exceptionResponse?.code || 'Customized Code Here';
+      const data = exceptionResponse?.data || null;
+      const request = ctx.getRequest();
+      const path = request.url;
 
       response
         .status(status)
@@ -21,22 +24,26 @@ export class GqlHttpExceptionFilter implements ExceptionFilter {
           statusCode: status,
           message: message,
           code: code,
+          data: data,
+          path: path,
         });
     } else  {
-      // 如果是 GraphQL 请求，处理 GraphQL 异常
       const gqlHost = GqlArgumentsHost.create(host);
-      const response = exception.getResponse();
-      const message = exception.message;
-      const status = exception.getStatus();
-      const code = response['code'] || 'INTERNAL_SERVER_ERROR';
-      const data = response['data'];
+      const gqlInfo = gqlHost.getInfo();
+      const operationName = gqlInfo.operation.name?.value;
+      const fieldName = gqlInfo.fieldName;
+      const response = exception.getResponse() as any;
+      const message = response?.message || 'Internal server error';
+      const statusCode = exception.getStatus();
+      const data = response?.data || null;
+      const code = response?.code || 'Customized Code Here';
 
-      // 如果有自定义信息，使用它；否则使用默认的消息
-      throw new ApolloError(message, code, {
-        statusCode: status,
+      throw new ApolloError(message,code, {
+        status: statusCode,
         message: message,
-        code: code,
         data: data,
+        operationName: operationName,
+        fieldName: fieldName,
       });
     }
   }

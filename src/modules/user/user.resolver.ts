@@ -1,16 +1,11 @@
-import { Args, Mutation, Query, Resolver, Int } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver, Int, Context } from '@nestjs/graphql';
 import { UserService } from './services/user.service';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
-import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
-import { SendVerificationEmailDto } from '@/modules/notification/dtos/notification-request.dto';
-import { createUserSchema, updateUserSchema } from '@/validation/schemas/user/user.schema';
-import { getCodeSchema, resetPasswordSchema } from '@/validation/schemas/reset-password/reset-password.schema';
-import { ZodValidationPipe } from '@/modules/user/pipes/zod-validation.pipe';
+import { ResetPasswordRequestDto, UserRequestDto } from '@/modules/user/dtos/user-request.dto';
 import { UseGuards } from '@nestjs/common';
 import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
 import { UpdateUserRequestDto } from '@/modules/user/dtos/user-request.dto';
 import { UserPasswordService } from '@/modules/user/services/user.password.service';
-import { updateUsernameSchema } from '@/validation/schemas/update-profile/update-profile.schema';
 import { SendUpdateUsernameEmailRequestDto } from '@/modules/notification/dtos/notification-request.dto';
 
 @Resolver()
@@ -40,16 +35,21 @@ export class UserResolver {
   }
 
   @Mutation(() => UserResponseDto)
-  async createUser(@Args('input', new ZodValidationPipe(createUserSchema)) input: UserRequestDto): Promise<UserResponseDto> {
-    return await this.userService.createUser(input);
+  async createUser(
+    @Args(
+      'input') input: UserRequestDto,
+    @Context() context: any,
+  ): Promise<UserResponseDto> {
+    const locale = context.req.cookies['NEXT_LOCALE']
+    return await this.userService.createUser(input, locale);
   }
 
-  @Mutation(() => UserResponseDto)
+  @Mutation(() => Boolean)
   @UseGuards(CombinedAuthGuard)
   async updateUser(
     @Args('id') id: string,
-    @Args('input', new ZodValidationPipe(updateUserSchema)) input: UpdateUserRequestDto,
-  ): Promise<UserResponseDto> {
+    @Args('input') input: UpdateUserRequestDto,
+  ): Promise<boolean> {
     return await this.userService.updateUser(id, input);
   }
 
@@ -61,27 +61,18 @@ export class UserResolver {
 
   @Mutation(() => Boolean)
   async sendVerificationCodeEmail(
-    @Args('input', new ZodValidationPipe(getCodeSchema)) input: SendVerificationEmailDto,
+    @Args('username') username: string,
+    @Args('emailInfoType', { type: () => Int }) emailInfoType: number,
   ): Promise<boolean> {
-    const { username, emailInfoType } = input;
     return await this.userService.sendVerificationCodeEmail(username, emailInfoType);
   }
 
   @Mutation(() => Boolean)
   async resetPassword(
     @Args('username') username: string,
-    @Args('input', new ZodValidationPipe(resetPasswordSchema)) input: UpdateUserRequestDto,
+    @Args('input') input: ResetPasswordRequestDto,
   ): Promise<boolean> {
     return await this.userResetPasswordService.resetPassword(username, input);
-  }
-
-  @Mutation(() => UserResponseDto)
-  // @UseGuards(CombinedAuthGuard)
-  async updateUserByUsername(
-    @Args('username') username: string,
-    @Args('input', new ZodValidationPipe(updateUserSchema)) input: UpdateUserRequestDto,
-  ): Promise<UserResponseDto> {
-    return await this.userService.updateUserByUsername(username, input);
   }
 
   @Mutation(() => Boolean)
@@ -94,18 +85,23 @@ export class UserResolver {
 
   @Mutation(() => Boolean)
   async resendActivationLinkEmail(
-  @Args('username') username: string,
-  @Args('emailInfoType', { type: () => Int }) emailInfoType: number,
-  @Args('newUsername', { nullable: true }) newUsername?: string,
+    @Args('id') id: string,
+    @Args('emailInfoType', { type: () => Int }) emailInfoType: number,
+    @Context() context: any,
+    @Args('newUsername', { nullable: true }) newUsername?: string,
   ): Promise<boolean> {
-    return await this.userService.resendActivationLinkEmail(username, emailInfoType, newUsername);
+    const locale = context.req.cookies['NEXT_LOCALE']
+    return await this.userService.resendActivationLinkEmail({ id, emailInfoType, newUsername, locale });
   }
 
   @Mutation(() => Boolean)
+  @UseGuards(CombinedAuthGuard)
   async sendUpdateUsernameEmail(
-    @Args('username') username: string,
-    @Args('input', new ZodValidationPipe(updateUsernameSchema)) input: SendUpdateUsernameEmailRequestDto,
+    @Args('id') id: string,
+    @Args('input') input: SendUpdateUsernameEmailRequestDto,
+    @Context() context: any,
   ): Promise<boolean> {
-    return await this.userService.sendUpdateUsernameEmail(username, input);
+    const locale = context.req.cookies['NEXT_LOCALE']
+    return await this.userService.sendUpdateUsernameEmail(id, input, locale);
   }
 }

@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Param, Res, Req, HttpStatus,UseInterceptors, UploadedFile,  BadRequestException, } from '@nestjs/common';
+import { BadRequestException, Controller, Get, HttpStatus, Param, Post, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Response } from 'express';
 import { GridFsService } from './file.service';
-import { UseGuards } from '@nestjs/common';
 import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Readable } from 'stream';
@@ -24,7 +23,7 @@ export class FilesController {
       'Content-Disposition': `attachment; filename="${file.filename}"`,
     });
 
-    fileStream.pipe(res).on('error', (err) => {
+    fileStream.pipe(res).on('error', () => {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('Failed to download file');
     });
   }
@@ -37,7 +36,7 @@ export class FilesController {
       throw new BadRequestException('No file uploaded');
     }
 
-    const uploadResult = await this.gridFsService.uploadFile(
+    return await this.gridFsService.uploadFile(
       {
         createReadStream: () => Readable.from(file.buffer),
         filename: file.originalname,
@@ -46,8 +45,6 @@ export class FilesController {
       },
       req,
     );
-
-    return uploadResult;
   }
 
 }

@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '@/modules/user/services/user.service';
 import { Request } from 'express';
-import { CustomException } from '@/common/exceptions/user.exception';
-import {
-  USER_NOT_FOUND
-} from '@/common/constants/code';
+import { ErrorContext } from '@/common/adjustment-strategies/error-context';
+import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified-error.strategy';
+import { NOT_FOUND_ERROR } from '@/common/constants/code';
+import { I18nService } from '@/modules/i18n/i18n.service';
 
 export interface RefreshTokenResponse {
   id: string;
@@ -16,14 +16,23 @@ export interface RefreshTokenResponse {
 
 @Injectable()
 export class TokenService {
+  private readonly errorContext: ErrorContext;
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
+    private readonly unifiedErrorStrategy: UnifiedErrorStrategyImpl,
+    private readonly i18nService: I18nService,
   ) {
+    this.errorContext = new ErrorContext(this.unifiedErrorStrategy);
+  }
+
+  private t(key: string): string {
+    return this.i18nService.getTranslation(key);
   }
 
   async processToken(req: Request): Promise<RefreshTokenResponse> {
-    let accessTokenFromRequest = ""
+    let accessTokenFromRequest = '';
     const cookies = req.headers.cookie;
     if (cookies) {
       const cookieArray = cookies.split(';');
@@ -34,25 +43,24 @@ export class TokenService {
         }
       }
     }
-
+    await this.errorContext.execute({
+      type: 'TRUE_OR_FALSE', trueOrFalse: accessTokenFromRequest, message: this.t('accessTokenNotExists'),
+      code: NOT_FOUND_ERROR,
+    });
     let id: string;
     let accessTokenFromDB: string;
     let refreshTokenFromDB: string;
-
-    if (accessTokenFromRequest) {
-      const decoded = this.jwtService.decode(accessTokenFromRequest);
-      id = decoded.id;
-      const user = await this.userService.findOneUser(id);
-      if (!user) {
-        throw new CustomException('User not found', 'USER_NOT_FOUND', USER_NOT_FOUND);
-      }
-      refreshTokenFromDB = user.refreshToken;
-      accessTokenFromDB = user.accessToken;
-      req.headers['x-refresh-token'] = refreshTokenFromDB;
-    } else {
-      throw new CustomException('Access token not found in cookies', 'TOKEN_NOT_FOUND', 401);
-    }
-
+    const decoded = this.jwtService.decode(accessTokenFromRequest);
+    id = decoded.id;
+    const foundUser = await this.userService.findOneUser(id);
+    await this.errorContext.execute(
+      {
+        type: 'IS_SINGLE_OBJ_EXIST', singleObj: foundUser, message: this.t('idNotFound'),
+        code: NOT_FOUND_ERROR,
+      });
+    refreshTokenFromDB = foundUser.refreshToken;
+    accessTokenFromDB = foundUser.accessToken;
+    req.headers['x-refresh-token'] = refreshTokenFromDB;
     return { accessTokenFromRequest, accessTokenFromDB, id };
   }
 }

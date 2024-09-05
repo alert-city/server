@@ -4,6 +4,7 @@ import {  ConfigService } from '@nestjs/config';
 import compression from 'compression';
 import { json, urlencoded } from 'express';
 import cookieParser from 'cookie-parser';
+import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ limit: '10mb', extended: true }));
+  app.useGlobalPipes(new ZodValidationPipe());
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 51004;
   await app.listen(port);

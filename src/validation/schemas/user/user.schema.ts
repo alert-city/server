@@ -4,7 +4,8 @@ export const passwordSchema = z.string()
   .min(6, 'Password must be at least 6 characters')
   .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
   .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-  .regex(/\d/, 'Password must contain at least one number');
+  .regex(/\d/, 'Password must contain at least one number')
+  .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/, 'Password must contain at least one special character (e.g. +-!@#$%^&*)');
 
 export const createUserSchema = z.object({
   username: z.string().min(1, "Username cannot be empty").max(255).email("Invalid email address"),
@@ -42,7 +43,9 @@ export const updateUserSchema = z.object({
     .max(255)
     .regex(/^\+61\d{9}$/, "Mobile phone number must start with +61 and contain 9 digits after the country code")
     .optional(),
-  verificationCode: z.string().min(1, "Verification code cannot be empty").max(255).optional(),
   is2FAEnabled: z.boolean().optional(),
+  twoFASecret: z.string().nullable().optional(),
+  isFirstLogin: z.boolean().optional(),
+  verificationCode: z.string().min(6, 'Verification code must be at least 6 characters').optional(),
 });
 

@@ -2,9 +2,9 @@ import { Resolver, Mutation, Args, Context } from '@nestjs/graphql';
 import { LoginResponseDto } from '@/modules/auth/dtos/login-response.dto';
 import { LoginRequestDto } from '@/modules/auth/dtos/login-request.dto';
 import { AuthService } from './auth.service';
-import { loginSchema } from '@/validation/schemas/login/login.schema';
-import { ZodValidationPipe } from '@/modules/user/pipes/zod-validation.pipe';
 import { TwoFADto } from '@/modules/auth/dtos/login-response.dto';
+import { UseGuards } from '@nestjs/common';
+import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
 
 @Resolver()
 export class AuthResolver {
@@ -15,7 +15,7 @@ export class AuthResolver {
 
   @Mutation(() => LoginResponseDto)
   async login(
-    @Args('input', new ZodValidationPipe(loginSchema)) input: LoginRequestDto,
+    @Args('input') input: LoginRequestDto,
   ): Promise<LoginResponseDto> {
     return await this.authService.login(input);
   }
@@ -26,18 +26,20 @@ export class AuthResolver {
   }
 
   @Mutation(() => TwoFADto)
+  @UseGuards(CombinedAuthGuard)
   async generate2FA(
     @Args('issuer') issuer: string,
-    @Args('username') username: string,
+    @Args('id') id: string,
   ): Promise<TwoFADto> {
-    return await this.authService.generate2FA(issuer, username);
+    return await this.authService.generate2FA(issuer, id);
   }
 
   @Mutation(() => Boolean)
+  @UseGuards(CombinedAuthGuard)
   async verify2FACode(
-    @Args('username') username: string,
+    @Args('id') id: string,
     @Args('code') code: string,
   ): Promise<boolean> {
-    return await this.authService.verify2FACode(username, code);
+    return await this.authService.verify2FACode(id, code);
   }
 }

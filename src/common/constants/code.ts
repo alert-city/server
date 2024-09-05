@@ -1,57 +1,32 @@
 // Success and Standard Status Codes
 export const SUCCESS = 200;
-export const UNAUTHORIZED = 401;
-export const FORBIDDEN = 403;
 
-// Unauthorized and Forbidden
-export const ACCESS_TOKEN_NOT_MATCH = 1000;
-export const ACCESS_TOKEN_VALIDATION_FAILED = 1001;
-export const REFRESH_TOKEN_VALIDATION_FAILED = 1002;
-export const TOKEN_NOT_MATCH = 1003;
-export const TOKEN_EXPIRED = 1004;
-export const TOKEN_NOT_FOUND = 1005;
+// 3xx Redirection Errors
+export const MOVED_PERMANENTLY = 301;  // Moved Permanently
+export const FOUND = 302;  // Found
 
-// Validation Errors
-export const NOT_EMPTY = 2000;
-export const VALIDATE_ERROR = 2001;
+// 4xx Client Errors
+export const VALIDATION_ERROR = 400;   // Bad Request
+export const AUTHORIZATION_ERROR = 401;  // Unauthorized
+export const FORBIDDEN_ERROR = 403;  // Forbidden
+export const NOT_FOUND_ERROR = 404;  // Not Found
+export const METHOD_NOT_ALLOWED = 405;  // Method Not Allowed
+export const CONFLICT_ERROR = 409;  // Conflict
+export const PAYLOAD_TOO_LARGE = 413;  // Payload Too Large
+export const TOO_MANY_REQUESTS = 429;  // Too Many Requests
 
-// Account Errors
-export const ACCOUNT_NOT_EXIST = 3000;
-export const ACCOUNT_EXIST = 3001;
-export const ACCOUNT_NOT_ACTIVATED = 3002;
-export const ID_INCORRECT = 3003;
+// File Upload and Processing Errors
+export const UNSUPPORTED_MEDIA_TYPE = 415;  // Unsupported Media Type
+export const UNPROCESSABLE_ENTITY = 422;  // Unprocessable Entity
 
-// User Errors
-export const USER_NOT_FOUND = 4000;
-export const CREATE_USER_ERROR = 4001;
-export const DELETE_USER_ERROR = 4002;
-export const USER_NOT_EXIST = 4003;
-export const RETRIEVE_USER_ERROR = 4004;
-export const SAME_USERNAME = 4005;
-export const USERNAME_TAKEN = 4006;
+// Resource Limitation Errors
+export const RATE_LIMIT_EXCEEDED = 429;  // Too Many Requests
 
-// Login Errors
-export const LOGIN_ERROR = 5000;
+// 5xx Server Errors
+export const INTERNAL_SERVER_ERROR = 500;  // Internal Server Error
+export const BAD_GATEWAY = 502;  // Bad Gateway
+export const SERVICE_UNAVAILABLE = 503;  // Service Unavailable
+export const GATEWAY_TIMEOUT = 504;  // Gateway Timeout
 
-// Register Errors
-export const REGISTER_ERROR = 6000;
-
-// Password Errors
-export const PASSWORD_NOT_MATCH = 7000;
-export const UPDATE_PASSWORD_ERROR = 7001;
-export const SAME_PASSWORD = 7002;
-
-// Verification Code Errors
-export const VERIFICATION_CODE_EXPIRED = 8000;
-export const VERIFICATION_CODE_NOT_MATCH = 8001;
-export const VERIFICATION_CODE_INVALID = 8002;
-export const INVALID_2FA_CODE = 8003;
-
-// Update Errors
-export const UPDATE_ERROR = 9000;
-
-// Unknown Error
-export const UNKNOWN_ERROR = 10009;
-
-//Organization Errors
-export const ORGANIZATION_EXIST = 11000;
+// Custom Error Codes
+export const ACCOUNT_NOT_ACTIVATED = 1000;
