@@ -40,6 +40,9 @@ export class LoginResponseDto {
 
   @Field(()=> String, {nullable: true})
   displayName?: string;
+
+  @Field(()=> Boolean, {nullable: true})
+  isFirstLogin?: boolean;
 }
 
 @ObjectType()

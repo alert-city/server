@@ -1,60 +1,61 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateUserRequestDto } from '@/modules/user/dtos/user-request.dto';
+import { UpdateUserRequestDto, ResetPasswordRequestDto } from '@/modules/user/dtos/user-request.dto';
 import { UserService } from './user.service';
-import { CustomException } from '@/common/exceptions/user.exception';
 import { UserUtilsService } from '@/modules/user/services/user-utils.service';
-import {
-  VERIFICATION_CODE_EXPIRED,
-  VERIFICATION_CODE_NOT_MATCH,
-  VERIFICATION_CODE_INVALID,
-  UPDATE_ERROR,
-  SAME_PASSWORD,
-} from '@/common/constants/code';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EmailCodeValidationResponseDto } from '@/modules/notification/dtos/notification-response.dto';
+import { ErrorContext } from '@/common/adjustment-strategies/error-context';
+import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified-error.strategy';
+import { NOT_FOUND_ERROR } from '@/common/constants/code';
+import { I18nService } from '@/modules/i18n/i18n.service';
 
 @Injectable()
 export class UserPasswordService {
+  private readonly errorContext: ErrorContext;
+
   constructor(
     private readonly userService: UserService,
     private readonly userUtilsService: UserUtilsService,
-    @InjectModel('EmailCodeValidation') private readonly EmailCodeValidationModel: Model<EmailCodeValidationResponseDto>,
-  ) {}
+    @InjectModel(
+      'EmailCodeValidation') private readonly EmailCodeValidationModel: Model<EmailCodeValidationResponseDto>,
+    private readonly unifiedErrorStrategy: UnifiedErrorStrategyImpl,
+    private readonly i18nService: I18nService,
+  ) {
+    this.errorContext = new ErrorContext(this.unifiedErrorStrategy);
+  }
+
+  private t(key: string): string {
+    return this.i18nService.getTranslation(key);
+  }
 
   async resetPassword(
     username: string,
-    input: UpdateUserRequestDto,
+    input: ResetPasswordRequestDto
   ): Promise<boolean> {
     const user = await this.userService.findUserByUsername(username);
     const id = user.id;
     const records = await this.EmailCodeValidationModel.find({ userId: id }).sort({ createdAt: -1 }).exec();
     const latestRecord = records[0];
-    const passwordStored = user.password;
-    const isPasswordSame = await this.userUtilsService.comparePassword(input.password, passwordStored);
-
-    if (isPasswordSame) {
-      throw new CustomException('New password cannot be the same as the old password', 'SAME_PASSWORD', SAME_PASSWORD);
-    } else if (!latestRecord) {
-      throw new CustomException('Verification code invalid', 'VERIFICATION_CODE_INVALID', VERIFICATION_CODE_INVALID);
-    }
+    const storedPassword = user.password;
+    await this.errorContext.execute(
+      {
+        type: 'IS_SINGLE_OBJ_EXIST', singleObj: latestRecord, message: this.t('usernameNotExists'),
+        code: NOT_FOUND_ERROR,
+      });
     const { verificationCode, expires } = latestRecord;
-    const now = new Date();
-
     input.verificationCode = input.verificationCode.trim();
-    if (input.verificationCode !== verificationCode) {
-      throw new CustomException('Verification code is not match', 'VERIFICATION_CODE_NOT_MATCH', VERIFICATION_CODE_NOT_MATCH);
-    } else if (expires < now) {
-      throw new CustomException('Verification code is expired', 'VERIFICATION_CODE_EXPIRED', VERIFICATION_CODE_EXPIRED);
-    }
-
+    await this.errorContext.execute({
+      type: 'COMPARE_TWO_STRINGS_NOT_EQUAL', string: { string1: input.verificationCode, string2: verificationCode },
+      message: this.t('verificationCodeNotMatch'),
+    });
+    await this.errorContext.execute(
+      { type: 'IS_PASSWORD_SAME', password: { passwordFromFE: input.password, passwordFromDB: storedPassword } });
+    await this.errorContext.execute(
+      { type: 'IS_EXPIRED', expires: expires, message: this.t('verificationCodeExpired') });
     input.password = await this.userUtilsService.hashPassword(input.password);
-    const updatedUser = await this.userService.updateUser(id, { password: input.password });
-    if (!updatedUser) {
-      throw new CustomException('User not updated', 'UPDATE_ERROR', UPDATE_ERROR);
-    }
+    await this.userService.updateUser(id, { password: input.password });
     await this.EmailCodeValidationModel.deleteMany({ userId: id });
     return true;
   }
-
 }

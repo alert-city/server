@@ -11,7 +11,7 @@ import { RefreshTokenGuard } from '@/modules/auth/guards/jwt-refresh-auth.guard'
 import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
 import { AccessJwtStrategy }  from './strategies/access-jwt.strategy';
 import { UserUtilsService } from '@/modules/user/services/user-utils.service';
-
+import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified-error.strategy';
 
 @Module({
   imports: [
@@ -24,8 +24,8 @@ import { UserUtilsService } from '@/modules/user/services/user-utils.service';
       }),
     }),
   ],
-  providers: [AuthResolver, AuthService,TokenService, AccessJwtStrategy,RefreshJwtStrategy,AccessTokenGuard, RefreshTokenGuard, CombinedAuthGuard, UserUtilsService],
-  exports: [AuthResolver, AuthService,TokenService, AccessJwtStrategy,RefreshJwtStrategy,AccessTokenGuard, RefreshTokenGuard, CombinedAuthGuard],
+  providers: [AuthResolver, AuthService,TokenService, AccessJwtStrategy,RefreshJwtStrategy,AccessTokenGuard, RefreshTokenGuard, CombinedAuthGuard, UserUtilsService,UnifiedErrorStrategyImpl],
+  exports: [AuthResolver, AuthService,TokenService, AccessJwtStrategy,RefreshJwtStrategy,AccessTokenGuard, RefreshTokenGuard, CombinedAuthGuard, UserUtilsService],
 })
 
 export class AuthModule {}

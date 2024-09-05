@@ -11,6 +11,13 @@ import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
+interface SendActivationLinkEmailParams {
+  user: UserResponseDto;
+  emailInfoType: number;
+  newUsername?: string;
+  locale?: string;
+}
+
 @Injectable()
 export class NotificationService {
   private transporter: nodemailer.Transporter;
@@ -25,8 +32,10 @@ export class NotificationService {
   };
 
   constructor(
-    @InjectModel('EmailLinkValidation') private readonly emailLinkValidationModel: Model<EmailLinkValidationResponseDto>,
-    @InjectModel('EmailCodeValidation') private readonly emailCodeValidationModel: Model<EmailCodeValidationResponseDto>,
+    @InjectModel(
+      'EmailLinkValidation') private readonly emailLinkValidationModel: Model<EmailLinkValidationResponseDto>,
+    @InjectModel(
+      'EmailCodeValidation') private readonly emailCodeValidationModel: Model<EmailCodeValidationResponseDto>,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private readonly configService: ConfigService,
     private readonly userUtilsService: UserUtilsService,
@@ -70,7 +79,7 @@ export class NotificationService {
     const htmlContent = `
     <div style="font-family: Arial, sans-serif; color: #333;">
     <div style="text-align: center;">
-      <img src="${baseUrl}/images/alertcity.png" alt="Alert City Logo" style="width: 100px; height: 100px; margin-bottom: 20px;">
+      <img src="${baseUrl}/images/alertcity-light.png" alt="Alert City Logo" style="width: 100px; height: 100px; margin-bottom: 20px;">
     </div>
     <h2 style="text-align: center; margin-top: 0;">${head}</h2>
     <p>${greeting}</p>
@@ -106,9 +115,7 @@ export class NotificationService {
   }
 
   async sendActivationLinkEmail(
-    user: UserResponseDto,
-    emailInfoType: number,
-    newUsername?: string,
+    { user, emailInfoType, newUsername, locale } :SendActivationLinkEmailParams
   ): Promise<boolean> {
     let greeting = '';
     if (user?.accountType === 'Organization') {
@@ -133,11 +140,11 @@ export class NotificationService {
     const baseUrl = this.configService.get<string>('FRONTEND_URL');
     const token = await this.userUtilsService.generateToken(user.id);
     const emailType = emailInfoType === 2 ? 'update' : 'activate';
-    const activationLink = newUsername ? `${baseUrl}/${emailType}?token=${token}&username=${user.username}&newUsername=${newUsername}&emailInfoType=${emailInfoType}` : `${baseUrl}/${emailType}?token=${token}&username=${user.username}&emailInfoType=${emailInfoType}`;
+    const activationLink = newUsername ? `${baseUrl}/${locale}/${emailType}?token=${token}&id=${user.id}&newUsername=${newUsername}&emailInfoType=${emailInfoType}` : `${baseUrl}/${locale}/${emailType}?token=${token}&id=${user.id}&emailInfoType=${emailInfoType}`;
     const htmlContent = `
     <div style="font-family: Arial, sans-serif; color: #333;">
     <div style="text-align: center;">
-      <img src="${baseUrl}/images/alertcity.png" alt="Alert City Logo" style="width: 100px; height: 100px; margin-bottom: 20px;">
+      <img src="${baseUrl}/images/alertcity-light.png" alt="Alert City Logo" style="width: 100px; height: 100px; margin-bottom: 20px;">
     </div>
     <h2 style="text-align: center; margin-top: 0; margin-bottom:10px;">${head}</h2>
     <p>${greeting}</p>

@@ -1,150 +1,108 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
 import { EmailLinkValidationResponseDto } from '@/modules/notification/dtos/notification-response.dto';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
-import { UpdateUserRequestDto, UserRequestDto } from '@/modules/user/dtos/user-request.dto';
+import { UpdateUserRequestDto, UserRequestDto, ResetPasswordRequestDto } from '@/modules/user/dtos/user-request.dto';
 import { UserUtilsService } from '@/modules/user/services/user-utils.service';
-import { CustomException } from '@/common/exceptions/user.exception';
-import { ConfigService } from '@nestjs/config';
-import {
-  ACCOUNT_EXIST,
-  CREATE_USER_ERROR,
-  DELETE_USER_ERROR,
-  ORGANIZATION_EXIST,
-  RETRIEVE_USER_ERROR,
-  TOKEN_NOT_FOUND,
-  UPDATE_ERROR,
-  USER_NOT_FOUND,
-  SAME_USERNAME,
-  ID_INCORRECT,
-} from '@/common/constants/code';
 import { NotificationService } from '@/modules/notification/notification.service';
 import { SendUpdateUsernameEmailRequestDto } from '@/modules/notification/dtos/notification-request.dto';
+import { ErrorContext } from '@/common/adjustment-strategies/error-context';
+import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified-error.strategy';
+import { NOT_FOUND_ERROR } from '@/common/constants/code';
+import { I18nService } from '@/modules/i18n/i18n.service';
 
 @Injectable()
 export class UserService {
+  private readonly errorContext: ErrorContext;
+
   constructor(
     @InjectModel('User') private readonly userModel: Model<UserResponseDto>,
-    @InjectModel('EmailLinkValidation') private readonly emailLinkValidationModel: Model<EmailLinkValidationResponseDto>,
+    @InjectModel(
+      'EmailLinkValidation') private readonly emailLinkValidationModel: Model<EmailLinkValidationResponseDto>,
     private readonly userUtilsService: UserUtilsService,
-    private readonly configService: ConfigService,
     @Inject(forwardRef(() => NotificationService)) private readonly notificationService: NotificationService,
+    private readonly unifiedErrorStrategy: UnifiedErrorStrategyImpl,
+    private readonly i18nService: I18nService,
   ) {
+    this.errorContext = new ErrorContext(this.unifiedErrorStrategy);
+  }
+
+  private t(key: string): string {
+    return this.i18nService.getTranslation(key);
   }
 
   async findAllUsers(): Promise<UserResponseDto[]> {
     const allUsers = await this.userModel.find().select('-password').exec();
-    if (allUsers.length === 0) {
-      throw new CustomException('User not found', 'USER_NOT_FOUND', USER_NOT_FOUND);
-    }
+    await this.errorContext.execute(
+      { type: 'IS_ARRAY_OBJ_EMPTY', arrayObj: allUsers, message: this.t('userNotFound'), code: NOT_FOUND_ERROR });
     return allUsers;
   }
 
   async findUserByUsername(username: string): Promise<UserResponseDto> {
-    return await this.userModel.findOne({ username }).exec();
+    const foundUser = await this.userModel.findOne({ username }).exec();
+    await this.errorContext.execute(
+      {
+        type: 'IS_SINGLE_OBJ_EXIST', singleObj: foundUser, message: this.t('usernameNotExists'),
+        code: NOT_FOUND_ERROR,
+      });
+    return foundUser;
   }
 
   async findOneUser(id: string): Promise<UserResponseDto> {
+    await this.errorContext.execute({ type: 'ID_VALIDATION', id });
     const foundUser = await this.userModel.findById(id).select('-password').exec();
-    if (!foundUser) {
-      throw new CustomException('User not found', 'USER_NOT_FOUND', USER_NOT_FOUND);
-    }
+    await this.errorContext.execute(
+      { type: 'IS_SINGLE_OBJ_EXIST', singleObj: foundUser, message: this.t('userNotFound'), code: NOT_FOUND_ERROR });
     return foundUser;
   }
 
   async updateUser(
     id: string,
     input: UpdateUserRequestDto,
-  ): Promise<UserResponseDto> {
+  ): Promise<boolean> {
+    await this.errorContext.execute({ type: 'ID_VALIDATION', id });
+    const foundUser = await this.findOneUser(id);
+    await this.errorContext.execute({ type: 'VALIDATE_ACCOUNT_TYPE_FOR_UPDATE', user: foundUser, singleObj: input });
+    const hasOrgName = 'orgName' in input;
+    if (foundUser.accountType === 'Organization' && hasOrgName) {
+      await this.errorContext.execute({
+        type: 'COMPARE_TWO_STRINGS_EQUAL', string: { string1: input.orgName, string2: foundUser.orgName },
+        message: this.t('newOrgNameCannotBeSame'),
+      });
+      await this.errorContext.execute({ type: 'ORGANIZATION_EXISTS', orgName: input.orgName });
+    }
     const updatedUser = await this.userModel.findByIdAndUpdate(id, input, {
       new: true,
     }).select('-password').exec();
-    if (!updatedUser) {
-      throw new CustomException('User not updated', 'UPDATE_ERROR', UPDATE_ERROR);
-    }
-    return updatedUser;
+    return !!updatedUser;
   }
 
-  async updateUserByUsername(
-    username: string,
-    input: UpdateUserRequestDto,
-  ): Promise<UserResponseDto> {
-
-    const orgName = input.orgName;
-    if (orgName) {
-      const isOrganizationExist = await this.userUtilsService.isOrgExist(orgName);
-      if (isOrganizationExist) {
-        throw new CustomException('Organization already exists', 'ORGANIZATION_EXIST', ORGANIZATION_EXIST);
-      }
-    }
-
-    const updatedUser = await this.userModel.findOneAndUpdate(
-      { username },
-      input,
-      { new: true },
-    ).select('-password').exec();
-    if (!updatedUser) {
-      throw new CustomException('User not updated', 'UPDATE_ERROR', UPDATE_ERROR);
-    }
-    // console.log('updatedUser', updatedUser);
-    return updatedUser;
-  }
-
-
-  async createUser(input: UserRequestDto): Promise<UserResponseDto> {
+  async createUser(input: UserRequestDto, locale: string): Promise<UserResponseDto> {
     delete input.confirmPassword;
-    const isUsernameTaken = await this.userUtilsService.isUsernameTaken(input.username);
-    if (isUsernameTaken) {
-      throw new CustomException('Username already exists', 'ACCOUNT_EXIST', ACCOUNT_EXIST);
-    }
-
+    await this.errorContext.execute({ type: 'USERNAME_EXISTS', username: input.username });
     if (input.accountType === 'Organization') {
-      const orgName = input.orgName;
-      const isOrganizationExist = await this.userUtilsService.isOrgExist(orgName);
-      if (isOrganizationExist) {
-        throw new CustomException('Organization already exists', 'ORGANIZATION_EXIST', ORGANIZATION_EXIST);
-      }
+      await this.errorContext.execute({ type: 'ORGANIZATION_EXISTS', orgName: input.orgName });
     }
-
+    const emailInfoType = input.emailInfoType || 0;
+    delete input.emailInfoType;
     input.password = await this.userUtilsService.hashPassword(input.password);
-    const userInfo = { ...input, isAccountActivated: false };
+    const userInfo = { ...input, isAccountActivated: false, isFirstLogin: true };
     const newUser = await this.userModel.create(userInfo);
-    if (!newUser) {
-      throw new CustomException('User not created', 'CREATE_USER_ERROR', CREATE_USER_ERROR);
-    }
-    const { emailInfoType } = input;
-    const result = await this.notificationService.sendActivationLinkEmail(newUser, emailInfoType);
-
-    if (result) {
-      await this.updateUser(newUser.id, { isAccountActivated: false });
-    }
-
+    const result = await this.notificationService.sendActivationLinkEmail({ user: newUser, emailInfoType, locale });
+    result && await this.updateUser(newUser.id, { isAccountActivated: false });
     const { password, ...userWithoutPassword } = newUser.toObject();
     return userWithoutPassword as UserResponseDto;
   }
 
   async deleteUser(id: string): Promise<boolean> {
-    console.log('开始删除用户');
-    console.log('id', id);
-
-    if (!Types.ObjectId.isValid(id)) {
-      throw new CustomException('Invalid User ID', 'ID_NOT_CORRECT', ID_INCORRECT);
-    }
-
+    await this.errorContext.execute({ type: 'ID_VALIDATION', id });
     const deletedUser = await this.userModel.findByIdAndDelete(id).select('-password').exec();
-    if (!deletedUser) {
-      throw new CustomException('User not deleted', 'DELETE_USER_ERROR', DELETE_USER_ERROR);
-    }
+    await this.errorContext.execute(
+      {
+        type: 'IS_SINGLE_OBJ_EXIST', singleObj: deletedUser, message: this.t('userNotFound'), code: NOT_FOUND_ERROR,
+      });
     return true;
-  }
-
-  async getIdByUsername(username: string): Promise<string> {
-    const foundUser = await this.findUserByUsername(username);
-    if (foundUser.id) {
-      return foundUser.id;
-    }
   }
 
   async sendVerificationCodeEmail(
@@ -160,20 +118,19 @@ export class UserService {
   ): Promise<boolean> {
     const userId = await this.userUtilsService.getIdFromToken(token);
     const records = await this.emailLinkValidationModel.find({ userId: userId }).sort({ createdAt: -1 }).exec();
-    if (!records) {
-      throw new CustomException('Token not found', 'TOKEN_NOT_FOUND', TOKEN_NOT_FOUND);
-    }
+    await this.errorContext.execute(
+      { type: 'IS_ARRAY_OBJ_EMPTY', arrayObj: records, message: this.t('tokenNotFound'), code: NOT_FOUND_ERROR });
     const latestRecord = records[0];
-    if (!latestRecord) {
-      throw new CustomException('Token not found', 'TOKEN_NOT_FOUND', TOKEN_NOT_FOUND);
-    }
+    await this.errorContext.execute(
+      {
+        type: 'IS_SINGLE_OBJ_EXIST', singleObj: latestRecord, message: this.t('tokenNotFound'), code: NOT_FOUND_ERROR,
+      });
     const activationToken = latestRecord.activationToken;
-    const ActivationTokenId = latestRecord.id;
+    const activationTokenId = latestRecord.id;
     const isTokenValid = await this.userUtilsService.verifyToken(token, activationToken);
     if (!isTokenValid) {
       return false;
     }
-
     if (emailInfoType === 1) {
       await this.userModel.findByIdAndUpdate(userId, { isAccountActivated: true }).exec();
     }
@@ -181,40 +138,33 @@ export class UserService {
       const newUsername = latestRecord.newUsername;
       await this.userModel.findByIdAndUpdate(userId, { username: newUsername }).exec();
     }
-
-    await this.emailLinkValidationModel.findByIdAndDelete(ActivationTokenId).exec();
+    await this.emailLinkValidationModel.deleteMany({ userId: userId }).exec();
     return true;
   }
 
-  async resendActivationLinkEmail(
-    username: string,
-    emailInfoType: number,
-    newUsername?: string,
-  ): Promise<boolean> {
-    const foundUser = await this.findUserByUsername(username);
-    if (!foundUser) {
-      throw new CustomException('Failed to retrieve user information', 'RETRIEVE_USER_ERROR', RETRIEVE_USER_ERROR);
-    }
-    return await this.notificationService.sendActivationLinkEmail(foundUser, emailInfoType, newUsername);
+  async resendActivationLinkEmail({ id, emailInfoType, newUsername, locale }): Promise<boolean> {
+    const foundUser = await this.findOneUser(id);
+    await this.errorContext.execute(
+      { type: 'IS_SINGLE_OBJ_EXIST', singleObj: foundUser, message: this.t('idNotFound'), code: NOT_FOUND_ERROR });
+    await this.emailLinkValidationModel.deleteMany({ userId: id }).exec();
+    return await this.notificationService.sendActivationLinkEmail(
+      { user: foundUser, emailInfoType, newUsername, locale });
   }
 
   async sendUpdateUsernameEmail(
-    username: string,
+    id: string,
     input: SendUpdateUsernameEmailRequestDto,
+    locale: string,
   ): Promise<boolean> {
     const { newUsername, emailInfoType } = input;
-    const user = await this.findUserByUsername(username);
-
-    if (newUsername === user.username) {
-      throw new CustomException('The new username cannot be the same as the current username', 'SAME_USERNAME', SAME_USERNAME);
-    }
-
-    const isUsernameTaken = await this.userUtilsService.isUsernameTaken(newUsername);
-    if (isUsernameTaken) {
-      throw new CustomException('Username already exists', 'ACCOUNT_EXIST', ACCOUNT_EXIST);
-    }
-
-    return await this.notificationService.sendActivationLinkEmail(user, emailInfoType, newUsername);
+    const user = await this.findOneUser(id);
+    await this.errorContext.execute(
+      {
+        type: 'COMPARE_TWO_STRINGS_EQUAL', string: { string1: newUsername, string2: user.username },
+        message: this.t('newUsernameCannotBeSame'),
+      });
+    await this.errorContext.execute({ type: 'USERNAME_EXISTS', username: newUsername });
+    return await this.notificationService.sendActivationLinkEmail({ user, emailInfoType, newUsername, locale });
   }
 
 }

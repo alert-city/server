@@ -43,6 +43,9 @@ class BaseUserRequestDto {
 
   @Field(() => Boolean, { nullable: true })
   is2FAEnabled?: boolean;
+
+  @Field(() => String, { nullable: true })
+  twoFASecret?: string;
 }
 
 @InputType()
@@ -94,5 +97,19 @@ export class UpdateUserRequestDto extends BaseUserRequestDto {
 
   @Field(() => String, { nullable: true })
   verificationCode?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  isFirstLogin?: boolean;
 }
 
+@InputType()
+export class ResetPasswordRequestDto {
+  @Field(() => String)
+  verificationCode: string;
+
+  @Field(() => String)
+  password: string;
+
+  @Field(() => String)
+  confirmPassword: string;
+}

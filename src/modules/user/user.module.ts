@@ -9,6 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserUtilsService } from '@/modules/user/services/user-utils.service';
 import { UserPasswordService } from '@/modules/user/services/user.password.service';
 import { NotificationModule } from '@/modules/notification/notification.module';
+import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified-error.strategy';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { NotificationModule } from '@/modules/notification/notification.module';
       }),
     }),
   ],
-  providers: [UserService, UserResolver, UserUtilsService, UserPasswordService],
+  providers: [UserService, UserResolver, UserUtilsService, UserPasswordService, UnifiedErrorStrategyImpl],
   exports: [UserService, UserUtilsService, MongooseModule],
 })
 export class UserModule {
