@@ -79,7 +79,7 @@ export class NotificationService {
     const htmlContent = `
     <div style="font-family: Arial, sans-serif; color: #333;">
     <div style="text-align: center;">
-      <img src="${baseUrl}/images/alertcity-light.png" alt="Alert City Logo" style="width: 100px; height: 100px; margin-bottom: 20px;">
+      <img src="${baseUrl}/images/alertcity-dark.png" alt="Alert City Logo" style="width: 100px; height: 100px; margin-bottom: 20px;">
     </div>
     <h2 style="text-align: center; margin-top: 0;">${head}</h2>
     <p>${greeting}</p>
@@ -144,7 +144,7 @@ export class NotificationService {
     const htmlContent = `
     <div style="font-family: Arial, sans-serif; color: #333;">
     <div style="text-align: center;">
-      <img src="${baseUrl}/images/alertcity-light.png" alt="Alert City Logo" style="width: 100px; height: 100px; margin-bottom: 20px;">
+      <img src="${baseUrl}/images/alertcity-dark.png" alt="Alert City Logo" style="width: 100px; height: 100px; margin-bottom: 20px;">
     </div>
     <h2 style="text-align: center; margin-top: 0; margin-bottom:10px;">${head}</h2>
     <p>${greeting}</p>

@@ -14,8 +14,8 @@ export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh-
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => {
         let token = null;
-        if (req && req.headers['x-refresh-token']) {
-          token = req.headers['x-refresh-token'];
+        if (req && req.headers['Refresh-Token']) {
+          token = req.headers['Refresh-Token'];
         }
         return token;
       }]),
