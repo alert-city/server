@@ -60,7 +60,7 @@ export class TokenService {
       });
     refreshTokenFromDB = foundUser.refreshToken;
     accessTokenFromDB = foundUser.accessToken;
-    req.headers['x-refresh-token'] = refreshTokenFromDB;
+    req.headers['Refresh-Token'] = refreshTokenFromDB;
     return { accessTokenFromRequest, accessTokenFromDB, id };
   }
 }

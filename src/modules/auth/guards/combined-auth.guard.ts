@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { AuthService } from '@/modules/auth/auth.service';
 import { AccessTokenGuard } from './jwt-access-auth.guard';
@@ -45,7 +45,7 @@ export class CombinedAuthGuard implements CanActivate {
     const { accessTokenFromRequest, accessTokenFromDB } = await this.tokenService.processToken(req);
 
     if (accessTokenFromRequest !== accessTokenFromDB) {
-      res.setHeader('x-auth-status', 'invalid');
+      res.setHeader('Auth-Status', 'invalid');
       await this.errorContext.execute(
         {
           type: 'COMPARE_TWO_STRINGS_NOT_EQUAL',
@@ -66,11 +66,11 @@ export class CombinedAuthGuard implements CanActivate {
           if (canActivate) {
             const user = req.user;
             const newAccessToken = await this.authService.generateAccessToken(user);
-            res.setHeader('x-new-access-token', newAccessToken);
+            res.setHeader('New-Access-Token', newAccessToken);
             return true;
           }
         } catch (refreshTokenErr) {
-          res.setHeader('x-auth-status', 'invalid');
+          res.setHeader('Auth-Status', 'invalid');
           await this.errorContext.execute(
             { type: 'DIRECT_THROW', message: this.t('bothTokenInvalid'), code: FORBIDDEN_ERROR });
         }
