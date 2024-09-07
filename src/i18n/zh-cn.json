@@ -23,5 +23,7 @@
   "invalid2FACode": "无效的双因素认证验证码",
   "accessTokenNotMatch": "访问令牌不匹配",
   "bothTokenInvalid": "两个令牌都无效，请重新登录",
-  "verificationCodeExpired": "验证码过期"
+  "verificationCodeExpired": "验证码过期",
+  "eventsNotFound": "未找到事件",
+  "createEventError": "提交事件错误"
 }

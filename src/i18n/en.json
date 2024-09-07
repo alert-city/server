@@ -23,5 +23,7 @@
   "invalid2FACode": "Invalid 2FA code",
   "accessTokenNotMatch": "Access token not match",
   "bothTokenInvalid": "Both tokens are invalid, please re-login",
-  "verificationCodeExpired": "Verification code is expired"
+  "verificationCodeExpired": "Verification code is expired",
+  "eventsNotFound": "Events not found",
+  "createEventError": "Create event error"
 }

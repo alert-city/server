@@ -13,6 +13,7 @@ import { FileModule } from './modules/file/file.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { I18nModule } from '@/modules/i18n/i18n.module';
 import { LocaleMiddleware } from '@/modules/i18n/localeMiddleware';
+import { EventModule } from './modules/event/event.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { LocaleMiddleware } from '@/modules/i18n/localeMiddleware';
       context: ({ req, res }) => ({ req, res, refreshToken: req['refreshToken'] }),
     }),
     UserModule,
+    EventModule
   ],
   providers: [
     {
