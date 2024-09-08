@@ -10,6 +10,7 @@ import { UserUtilsService } from '@/modules/user/services/user-utils.service';
 import { UserPasswordService } from '@/modules/user/services/user.password.service';
 import { NotificationModule } from '@/modules/notification/notification.module';
 import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified-error.strategy';
+import { PubSub } from 'graphql-subscriptions';
 
 @Module({
   imports: [
@@ -26,7 +27,11 @@ import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified
       }),
     }),
   ],
-  providers: [UserService, UserResolver, UserUtilsService, UserPasswordService, UnifiedErrorStrategyImpl],
+  providers: [UserService, UserResolver, UserUtilsService, UserPasswordService, UnifiedErrorStrategyImpl,
+    {
+      provide: 'PUB_SUB',
+      useValue: new PubSub()
+    }],
   exports: [UserService, UserUtilsService, MongooseModule],
 })
 export class UserModule {

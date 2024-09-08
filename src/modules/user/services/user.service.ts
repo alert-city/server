@@ -12,6 +12,7 @@ import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified
 import { NOT_FOUND_ERROR } from '@/common/constants/code';
 import { I18nService } from '@/modules/i18n/i18n.service';
 import { ConfigService } from '@nestjs/config';
+import { PubSub } from 'graphql-subscriptions';
 
 @Injectable()
 export class UserService {
@@ -26,6 +27,7 @@ export class UserService {
     private readonly unifiedErrorStrategy: UnifiedErrorStrategyImpl,
     private readonly i18nService: I18nService,
     private readonly configService: ConfigService,
+    @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {
     this.errorContext = new ErrorContext(this.unifiedErrorStrategy);
   }
@@ -77,6 +79,9 @@ export class UserService {
     const updatedUser = await this.userModel.findByIdAndUpdate(id, input, {
       new: true,
     }).select('-password').exec();
+    if (updatedUser) {
+      await this.pubSub.publish('userUpdated', { userUpdated: updatedUser });
+    }
     return !!updatedUser;
   }
 
