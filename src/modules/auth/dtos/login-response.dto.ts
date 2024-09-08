@@ -33,7 +33,7 @@ export class LoginResponseDto {
   staffs?: string[];
 
   @Field(()=> String, {nullable: true})
-  mobilePhone?: string;
+  phoneNumber?: string;
 
   @Field(()=> String, {nullable: true})
   accessToken: string;

@@ -13,11 +13,11 @@ import { FileModule } from './modules/file/file.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { I18nModule } from '@/modules/i18n/i18n.module';
 import { LocaleMiddleware } from '@/modules/i18n/localeMiddleware';
+import * as process from 'node:process';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
       isGlobal: true,
     }),
     DatabaseModule,
@@ -29,6 +29,7 @@ import { LocaleMiddleware } from '@/modules/i18n/localeMiddleware';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
+      introspection: process.env.NODE_ENV === 'development',
       csrfPrevention: false,
       formatError: (error) => {
         return {
@@ -37,7 +38,7 @@ import { LocaleMiddleware } from '@/modules/i18n/localeMiddleware';
           extensions: error.extensions,
         };
       },
-      context: ({ req, res }) => ({ req, res, refreshToken: req['refreshToken'] }),
+      context: ({ req, res }) => ({ req, res }),
     }),
     UserModule,
   ],
@@ -55,5 +56,4 @@ export class AppModule {
       .apply(LocaleMiddleware)
       .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
-
 }

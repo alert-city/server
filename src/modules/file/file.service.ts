@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { GridFSBucket, ObjectId } from 'mongodb';
-import { ReadStream } from 'fs';
 import { UserService } from '@/modules/user/services/user.service';
 import { TokenService } from '@/modules/auth/token.service';
 import { ConfigService } from '@nestjs/config';
@@ -41,9 +40,9 @@ export class GridFsService {
     const uploadStream = this.gridFsBucket.openUploadStream(filename);
     createReadStream().pipe(uploadStream);
 
-    const frontendUrl = this.configService.get<string>('BACKEND_URL');
+    const backendUrl = this.configService.get<string>('BACKEND_URL');
     const fileId = uploadStream.id;
-    const fileUrl = `${frontendUrl}/files/${fileId}`;
+    const fileUrl = `${backendUrl}/files/${fileId}`;
     const { id } = await this.tokenService.processToken(req);
     await this.userService.updateUser(id, { avatarUrl: fileUrl });
     return new Promise((
@@ -73,7 +72,7 @@ export class GridFsService {
           clearTimeout(timeoutId);
           resolve(true);
         })
-        .catch((error) => {
+        .catch(() => {
           clearTimeout(timeoutId);
           resolve(true);
         });
