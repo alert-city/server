@@ -1,8 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-import * as mongoose from 'mongoose';
-
-// export type UserDocument = User & Document;
 
 @Schema({
   discriminatorKey: 'role.userType',
@@ -42,7 +38,7 @@ export class User {
   staffs: string[];
 
   @Prop({ type: String })
-  mobilePhone: string;
+  phoneNumber: string;
 
   @Prop({ type: String })
   refreshToken: string;

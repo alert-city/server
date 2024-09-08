@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateUserRequestDto, ResetPasswordRequestDto } from '@/modules/user/dtos/user-request.dto';
+import { ResetPasswordRequestDto } from '@/modules/user/dtos/user-request.dto';
 import { UserService } from './user.service';
 import { UserUtilsService } from '@/modules/user/services/user-utils.service';
 import { InjectModel } from '@nestjs/mongoose';
@@ -34,13 +34,18 @@ export class UserPasswordService {
     input: ResetPasswordRequestDto
   ): Promise<boolean> {
     const user = await this.userService.findUserByUsername(username);
+    await this.errorContext.execute(
+      {
+        type: 'IS_SINGLE_OBJ_EXIST', singleObj: user, message: this.t('usernameNotExists'),
+        code: NOT_FOUND_ERROR,
+      });
     const id = user.id;
     const records = await this.EmailCodeValidationModel.find({ userId: id }).sort({ createdAt: -1 }).exec();
     const latestRecord = records[0];
     const storedPassword = user.password;
     await this.errorContext.execute(
       {
-        type: 'IS_SINGLE_OBJ_EXIST', singleObj: latestRecord, message: this.t('usernameNotExists'),
+        type: 'IS_SINGLE_OBJ_EXIST', singleObj: latestRecord, message: this.t('verificationCodeNotMatch'),
         code: NOT_FOUND_ERROR,
       });
     const { verificationCode, expires } = latestRecord;

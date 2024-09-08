@@ -3,7 +3,7 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { EmailLinkValidationResponseDto } from '@/modules/notification/dtos/notification-response.dto';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
-import { UpdateUserRequestDto, UserRequestDto, ResetPasswordRequestDto } from '@/modules/user/dtos/user-request.dto';
+import { UpdateUserRequestDto, UserRequestDto} from '@/modules/user/dtos/user-request.dto';
 import { UserUtilsService } from '@/modules/user/services/user-utils.service';
 import { NotificationService } from '@/modules/notification/notification.service';
 import { SendUpdateUsernameEmailRequestDto } from '@/modules/notification/dtos/notification-request.dto';
@@ -11,6 +11,7 @@ import { ErrorContext } from '@/common/adjustment-strategies/error-context';
 import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified-error.strategy';
 import { NOT_FOUND_ERROR } from '@/common/constants/code';
 import { I18nService } from '@/modules/i18n/i18n.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
@@ -24,6 +25,7 @@ export class UserService {
     @Inject(forwardRef(() => NotificationService)) private readonly notificationService: NotificationService,
     private readonly unifiedErrorStrategy: UnifiedErrorStrategyImpl,
     private readonly i18nService: I18nService,
+    private readonly configService: ConfigService,
   ) {
     this.errorContext = new ErrorContext(this.unifiedErrorStrategy);
   }
@@ -80,7 +82,10 @@ export class UserService {
 
   async createUser(input: UserRequestDto, locale: string): Promise<UserResponseDto> {
     delete input.confirmPassword;
-    await this.errorContext.execute({ type: 'USERNAME_EXISTS', username: input.username });
+    const recaptchaToken = input.captchaToken;
+    const secretKey = this.configService.get('CAPTCHA_SECRET_KEY');
+    const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaToken}`;
+    await this.errorContext.execute({ type: 'USERNAME_EXISTS_NOT_ACTIVATE', username: input.username });
     if (input.accountType === 'Organization') {
       await this.errorContext.execute({ type: 'ORGANIZATION_EXISTS', orgName: input.orgName });
     }
@@ -126,7 +131,6 @@ export class UserService {
         type: 'IS_SINGLE_OBJ_EXIST', singleObj: latestRecord, message: this.t('tokenNotFound'), code: NOT_FOUND_ERROR,
       });
     const activationToken = latestRecord.activationToken;
-    const activationTokenId = latestRecord.id;
     const isTokenValid = await this.userUtilsService.verifyToken(token, activationToken);
     if (!isTokenValid) {
       return false;

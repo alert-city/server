@@ -36,7 +36,7 @@ export class UserResponseDto {
   staffs?: string[];
 
   @Field(()=> String)
-  mobilePhone: string;
+  phoneNumber: string;
 
   @Field(()=> String, {nullable: true})
   refreshToken?: string;
