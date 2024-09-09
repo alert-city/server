@@ -24,6 +24,8 @@
   "accessTokenNotMatch": "Access token not match",
   "bothTokenInvalid": "Both tokens are invalid, please re-login",
   "verificationCodeExpired": "Verification code is expired",
+  "eventsNotFound": "Events not found",
+  "createEventError": "Create event error",
   "usernameExistsNotActivated": "Username already exists but not activated",
   "email": {
     "expiration": {
