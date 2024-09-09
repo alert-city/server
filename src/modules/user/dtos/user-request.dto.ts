@@ -36,7 +36,7 @@ class BaseUserRequestDto {
   staffs?: [string];
 
   @Field(() => String, { nullable: true })
-  mobilePhone?: string;
+  phoneNumber?: string;
 
   @Field(() => String, { nullable: true })
   verificationCode?: string;
@@ -66,10 +66,13 @@ export class UserRequestDto extends BaseUserRequestDto {
   role: string[];
 
   @Field(() => String)
-  mobilePhone: string;
+  phoneNumber: string;
 
   @Field(() => Number)
   emailInfoType: number;
+
+  @Field(() => String)
+  captchaToken: string;
 }
 
 @InputType()

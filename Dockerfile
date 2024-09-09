@@ -1,11 +1,11 @@
 # 使用指定版本官方 Node.js 镜像
-FROM node:22.4.1-alpine
+FROM node:20.10.0-alpine
 
 # 设置工作目录
 WORKDIR /app
 
-# 复制 package.json 和 package-lock.json
-COPY package*.json ./
+# 复制 package.json 和 yarn.lock
+COPY package.json yarn.lock ./
 
 # 安装依赖
 RUN yarn install
@@ -20,7 +20,7 @@ ENV NODE_ENV=production
 RUN yarn run build
 
 # 暴露应用端口
-EXPOSE 51003
+EXPOSE 51004
 
 # 启动应用
-CMD ["yarn", "run", "start:prod"]
+CMD ["yarn","start"]

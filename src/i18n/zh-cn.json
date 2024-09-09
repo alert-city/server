@@ -25,5 +25,51 @@
   "bothTokenInvalid": "两个令牌都无效，请重新登录",
   "verificationCodeExpired": "验证码过期",
   "eventsNotFound": "未找到事件",
-  "createEventError": "提交事件错误"
+  "createEventError": "提交事件错误",
+  "usernameExistsNotActivated": "用户名已存在但账户未激活",
+  "email": {
+    "expiration": {
+      "codeExpires": "此代码将在 <strong style='color: #FF0000;'>10</strong> 分钟后过期。",
+      "linkExpires": "此链接将在 <strong style='color: #FF0000;'>1</strong> 小时后过期。"
+    },
+    "footer": {
+      "ignore": "如果您没有请求此封邮件，请忽略此邮件或立即与我们联系！",
+      "bestRegards": "最好的祝愿，",
+      "alertCity": "Alert City",
+      "support": "如果您有任何问题或需要帮助，请<a href='https://support.alertcity.com' style='color: #007BFF;'>联系我们的支持团队</a>。"
+    },
+    "greeting": {
+      "organization": "致",
+      "personal": "亲爱的",
+      "colon": "："
+    },
+    "emailInfo": {
+      "code": {
+        "1": {
+          "title": "重置您的密码",
+          "subject": "重置密码请求 - 验证码",
+          "description": "您的验证码是："
+        },
+        "2": {
+          "title": "更新您的用户名",
+          "subject": "更新用户名请求 - 验证码",
+          "description": "您的验证码是："
+        }
+      },
+      "link": {
+        "1": {
+          "title": "激活您的账户",
+          "subject": "激活您的 Alert City 账户",
+          "description": "要完成您的注册，请点击以下链接激活您的账户：",
+            "button": "激活账户"
+        },
+        "2": {
+          "title": "更新您的用户名",
+          "subject": "更新用户名请求",
+          "description": "要完成您的用户名更新，请点击以下链接：",
+            "button": "更新用户名"
+        }
+      }
+    }
+  }
 }

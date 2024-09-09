@@ -39,6 +39,16 @@ export class UnifiedErrorStrategyImpl implements UnifiedErrorStrategy {
         }
         break;
 
+      case 'USERNAME_EXISTS_NOT_ACTIVATE':
+        const { result, id } = await this.userUtilsService.isUsernameTakenNotActivate(input.username);
+        if (result === true) {
+          throw new CustomException(this.t('usernameExistsNotActivate'), ACCOUNT_NOT_ACTIVATED, id);
+        }
+        if (result === false) {
+          throw new CustomException(this.t('usernameExists'), CONFLICT_ERROR);
+        }
+        break;
+
       case 'ORGANIZATION_EXISTS':
         const isOrganizationExist = await this.userUtilsService.isOrgExist(input.orgName);
         if (isOrganizationExist) {

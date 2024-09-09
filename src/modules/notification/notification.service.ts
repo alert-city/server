@@ -10,6 +10,7 @@ import {
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { I18nService } from '@/modules/i18n/i18n.service';
 
 interface SendActivationLinkEmailParams {
   user: UserResponseDto;
@@ -21,15 +22,6 @@ interface SendActivationLinkEmailParams {
 @Injectable()
 export class NotificationService {
   private transporter: nodemailer.Transporter;
-  private codeEmailInfo: { [key: number]: string[] } = {
-    1: ['Reset Your Password', 'Reset Password Request - Verification Code'],
-    2: ['Update Your Username', 'Update Username Request - Verification Code'],
-  };
-
-  private linkEmailInfo: { [key: number]: string[] } = {
-    1: ['Activate Your Account', 'Activate Your Alert City Account', 'To complete your registration, please click the link below to activate your account:'],
-    2: ['Update Your Username', 'Update Your Username Request', 'To complete your username update, please click the link below:'],
-  };
 
   constructor(
     @InjectModel(
@@ -39,6 +31,7 @@ export class NotificationService {
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private readonly configService: ConfigService,
     private readonly userUtilsService: UserUtilsService,
+    private readonly i18nService: I18nService,
   ) {
     this.transporter = nodemailer.createTransport({
       service: this.configService.get<string>('EMAIL_SERVICE'),
@@ -47,6 +40,10 @@ export class NotificationService {
         pass: this.configService.get<string>('EMAIL_PASSWORD'),
       },
     });
+  }
+
+  private t(key: string): string {
+    return this.i18nService.getTranslation(key);
   }
 
   async sendVerificationCodeEmail(
@@ -66,15 +63,9 @@ export class NotificationService {
       greeting = `Dear ${user.firstName}:`;
     }
 
-    let head = '';
-    let subject = '';
-    if (emailInfoType === 1) {
-      head = this.codeEmailInfo[1][0];
-      subject = this.codeEmailInfo[1][1];
-    } else if (emailInfoType === 2) {
-      head = this.codeEmailInfo[2][0];
-      subject = this.codeEmailInfo[2][1];
-    }
+    const head = this.t(`email.emailInfo.code.${emailInfoType}.title`);
+    const subject = this.t(`email.emailInfo.code.${emailInfoType}.subject`);
+    const description = this.t(`email.emailInfo.code.${emailInfoType}.description`);
 
     const htmlContent = `
     <div style="font-family: Arial, sans-serif; color: #333;">
@@ -83,13 +74,13 @@ export class NotificationService {
     </div>
     <h2 style="text-align: center; margin-top: 0;">${head}</h2>
     <p>${greeting}</p>
-    <p>Your verification code is:</p>
+    <p>${description}</p>
     <h1 style="color: #007BFF; text-align: center;">${verificationCode}</h1>
-    <p style="text-align: center;">This code will expire in <strong style="color: #FF0000;">10</strong> minutes.</p>
-    <p>If you did not request this code, please ignore this email or contact us ASAP!</p>
-    <p>Best regards,<br>Alert City</p>
+    <p style="text-align: center;">${this.t('email.expiration.codeExpires')}</p>
+    <p>${this.t('email.footer.ignore')}</p>
+    <p>${this.t('email.footer.bestRegards')}<br>${this.t('email.footer.alertCity')}</p>
     <hr style="margin: 20px 0;">
-    <p>If you have any questions or need help, please <a href="https://support.alertcity.com" style="color: #007BFF;">contact our support team</a>.</p>
+    <p>${this.t('email.footer.support')}</p>
 </div>
 `;
 
@@ -115,27 +106,19 @@ export class NotificationService {
   }
 
   async sendActivationLinkEmail(
-    { user, emailInfoType, newUsername, locale } :SendActivationLinkEmailParams
+    { user, emailInfoType, newUsername, locale }: SendActivationLinkEmailParams,
   ): Promise<boolean> {
     let greeting = '';
     if (user?.accountType === 'Organization') {
-      greeting = `To ${user.orgName}:`;
+      greeting = `${this.t('email.greeting.organization')} ${user.orgName}${this.t('email.greeting.colon')}`;
     } else if (user?.accountType === 'Personal') {
-      greeting = `Dear ${user.firstName}:`;
+      greeting = `${this.t('email.greeting.personal')} ${user.firstName}${this.t('email.greeting.colon')}`;
     }
 
-    let head = '';
-    let subject = '';
-    let description = '';
-    if (emailInfoType === 1) {
-      head = this.linkEmailInfo[1][0];
-      subject = this.linkEmailInfo[1][1];
-      description = this.linkEmailInfo[1][2];
-    } else if (emailInfoType === 2) {
-      head = this.linkEmailInfo[2][0];
-      subject = this.linkEmailInfo[2][1];
-      description = this.linkEmailInfo[2][2];
-    }
+    const head = this.t(`email.emailInfo.link.${emailInfoType}.title`);
+    const subject = this.t(`email.emailInfo.link.${emailInfoType}.subject`);
+    const description = this.t(`email.emailInfo.link.${emailInfoType}.description`);
+    const buttonContent = this.t(`email.emailInfo.link.${emailInfoType}.button`);
 
     const baseUrl = this.configService.get<string>('FRONTEND_URL');
     const token = await this.userUtilsService.generateToken(user.id);
@@ -150,13 +133,13 @@ export class NotificationService {
     <p>${greeting}</p>
     <p>${description}</p>
     <div style="text-align: center; margin: 30px 0;">
-      <a href="${activationLink}" style="background-color: #007BFF; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Activate Account</a>
+      <a href="${activationLink}" style="background-color: #007BFF; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">${buttonContent}</a>
     </div>
-    <p style="text-align: center;">This link will expire in <strong style="color: #FF0000;">1</strong> hour.</p>
-    <p>If you did not create an account, please ignore this email or contact us ASAP!</p>
-    <p>Best regards,<br>Alert City</p>
+    <p style="text-align: center;">${this.t('email.expiration.linkExpires')}</p>
+    <p>${this.t('email.footer.ignore')}</p>
+    <p>${this.t('email.footer.bestRegards')}<br>${this.t('email.footer.alertCity')}</p>
     <hr style="margin: 20px 0;">
-    <p>If you have any questions or need help, please <a href="https://support.alertcity.com" style="color: #007BFF;">contact our support team</a>.</p>
+    <p>${this.t('email.footer.support')}</p>
 </div>
 `;
 

@@ -25,5 +25,51 @@
   "bothTokenInvalid": "Both tokens are invalid, please re-login",
   "verificationCodeExpired": "Verification code is expired",
   "eventsNotFound": "Events not found",
-  "createEventError": "Create event error"
+  "createEventError": "Create event error",
+  "usernameExistsNotActivated": "Username already exists but not activated",
+  "email": {
+    "expiration": {
+      "codeExpires": "This code will expire in <strong style='color: #FF0000;'>10</strong> minutes.",
+      "linkExpires": "This link will expire in <strong style='color: #FF0000;'>1</strong> hour."
+    },
+    "footer": {
+      "ignore": "If you did not request this email, please ignore it or contact us ASAP!",
+      "bestRegards": "Best regards,",
+      "alertCity": "Alert City",
+      "support": "If you have any questions or need help, please <a href='https://support.alertcity.com' style='color: #007BFF;'>contact our support team</a>."
+    },
+    "greeting": {
+      "organization": "To",
+      "personal": "Dear",
+      "colon": ":"
+    },
+    "emailInfo": {
+      "code": {
+        "1": {
+          "title": "Reset Your Password",
+          "subject": "Reset Password Request - Verification Code",
+          "description": "Your verification code is:"
+        },
+        "2": {
+          "title": "Update Your Username",
+          "subject": "Update Username Request - Verification Code",
+          "description": "Your verification code is:"
+        }
+      },
+      "link": {
+        "1": {
+          "title": "Activate Your Account",
+          "subject": "Activate Your Alert City Account",
+          "description": "To complete your registration, please click the link below to activate your account:",
+          "button": "Activate Account"
+        },
+        "2": {
+          "title": "Update Your Username",
+          "subject": "Update Your Username Request",
+          "description": "To complete your username update, please click the link below:",
+          "button": "Update Username"
+        }
+      }
+    }
+  }
 }

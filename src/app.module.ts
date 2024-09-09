@@ -14,11 +14,11 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { I18nModule } from '@/modules/i18n/i18n.module';
 import { LocaleMiddleware } from '@/modules/i18n/localeMiddleware';
 import { EventModule } from './modules/event/event.module';
+import * as process from 'node:process';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
       isGlobal: true,
     }),
     DatabaseModule,
@@ -30,6 +30,7 @@ import { EventModule } from './modules/event/event.module';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
+      introspection: process.env.NODE_ENV === 'development',
       csrfPrevention: false,
       formatError: (error) => {
         return {
@@ -38,7 +39,7 @@ import { EventModule } from './modules/event/event.module';
           extensions: error.extensions,
         };
       },
-      context: ({ req, res }) => ({ req, res, refreshToken: req['refreshToken'] }),
+      context: ({ req, res }) => ({ req, res }),
     }),
     UserModule,
     EventModule
@@ -57,5 +58,4 @@ export class AppModule {
       .apply(LocaleMiddleware)
       .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
-
 }

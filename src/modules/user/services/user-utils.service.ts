@@ -31,6 +31,18 @@ export class UserUtilsService {
     return !!foundUser;
   }
 
+  async isUsernameTakenNotActivate(username: string): Promise<{ result: boolean, id?: string }> {
+    const foundUser = await this.userModel.findOne({ username });
+    if (!foundUser) {
+      return { result: null };
+    }
+    if (foundUser && !foundUser.isAccountActivated) {
+      return { result: true, id: foundUser.id };
+    } else if (foundUser && foundUser.isAccountActivated) {
+      return { result: false };
+    }
+  }
+
   async isOrgExist(orgName: string): Promise<boolean> {
     const foundUsers = await this.userModel.find({ orgName }).exec();
     return foundUsers.length >= 1;
