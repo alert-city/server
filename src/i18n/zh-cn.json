@@ -24,6 +24,8 @@
   "accessTokenNotMatch": "访问令牌不匹配",
   "bothTokenInvalid": "两个令牌都无效，请重新登录",
   "verificationCodeExpired": "验证码过期",
+  "eventsNotFound": "未找到事件",
+  "createEventError": "提交事件错误",
   "usernameExistsNotActivated": "用户名已存在但账户未激活",
   "email": {
     "expiration": {
