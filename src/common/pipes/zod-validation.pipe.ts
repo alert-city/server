@@ -1,9 +1,20 @@
-import { Injectable, PipeTransform, ArgumentMetadata, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  PipeTransform,
+  ArgumentMetadata,
+  BadRequestException,
+} from '@nestjs/common';
 import { ZodError } from 'zod';
 import { CustomException } from '@/common/exceptions/custom-exception';
 import { VALIDATION_ERROR } from '@/common/constants/code';
-import { UpdateUserRequestDto, ResetPasswordRequestDto } from '@/modules/user/dtos/user-request.dto';
-import { createUserSchema, updateUserSchema } from '@/validation/schemas/user/user.schema';
+import {
+  UpdateUserRequestDto,
+  ResetPasswordRequestDto,
+} from '@/modules/user/dtos/user-request.dto';
+import {
+  createUserSchema,
+  updateUserSchema,
+} from '@/validation/schemas/user/user.schema';
 import { UserRequestDto } from '@/modules/user/dtos/user-request.dto';
 import { resetPasswordSchema } from '@/validation/schemas/reset-password/reset-password.schema';
 import { SendUpdateUsernameEmailRequestDto } from '@/modules/notification/dtos/notification-request.dto';
@@ -33,7 +44,10 @@ export class ZodValidationPipe implements PipeTransform {
       return schema.parse(value);
     } catch (error) {
       if (error instanceof ZodError) {
-        throw new CustomException(`Zod Validation Failed: ${error.message}`, VALIDATION_ERROR);
+        throw new CustomException(
+          `Zod Validation Failed: ${error.message}`,
+          VALIDATION_ERROR,
+        );
       }
     }
   }

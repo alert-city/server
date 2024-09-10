@@ -68,11 +68,38 @@ export class UserRequestDto extends BaseUserRequestDto {
   @Field(() => String)
   phoneNumber: string;
 
-  @Field(() => Number)
-  emailInfoType: number;
-
   @Field(() => String)
-  captchaToken: string;
+  captchaToken?: string;
+
+  @Field(() => String, { nullable: true })
+  OAuthProvider?: string;
+
+  @Field(() => String, { nullable: true })
+  providerId?: string;
+}
+
+@InputType()
+export class OAuthUserRequestDto {
+  @Field(() => String)
+  username: string;
+
+  @Field(() => String, { nullable: true })
+  googleId?: string;
+
+  @Field(() => String, { nullable: true })
+  facebookId?: string;
+
+  @Field(() => String, { nullable: true })
+  firstName?: string;
+
+  @Field(() => String, { nullable: true })
+  lastName?: string;
+
+  @Field(() => String, { nullable: true })
+  avatarUrl?: string;
+
+  @Field(() => Boolean)
+  isStaySignedIn: boolean;
 }
 
 @InputType()

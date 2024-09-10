@@ -6,19 +6,24 @@ import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh-token') {
+export class RefreshJwtStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-refresh-token',
+) {
   constructor(
     private readonly userService: UserService,
     private readonly configService: ConfigService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => {
-        let token = null;
-        if (req && req.headers['Refresh-Token']) {
-          token = req.headers['Refresh-Token'];
-        }
-        return token;
-      }]),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req: Request) => {
+          let token = null;
+          if (req && req.headers['Refresh-Token']) {
+            token = req.headers['Refresh-Token'];
+          }
+          return token;
+        },
+      ]),
       secretOrKey: configService.get<string>('JWT_SECRET'),
     });
   }
@@ -27,4 +32,3 @@ export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh-
     return await this.userService.findOneUser(payload.id);
   }
 }
-

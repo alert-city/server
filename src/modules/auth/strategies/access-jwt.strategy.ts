@@ -5,10 +5,13 @@ import { UserService } from '@/modules/user/services/user.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class AccessJwtStrategy extends PassportStrategy(Strategy, 'jwt-access-token') {
+export class AccessJwtStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-access-token',
+) {
   constructor(
-  private readonly userService: UserService,
-  private readonly configService: ConfigService
+    private readonly userService: UserService,
+    private readonly configService: ConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([

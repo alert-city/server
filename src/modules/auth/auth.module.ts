@@ -1,17 +1,18 @@
-import { Module, forwardRef } from  '@nestjs/common';
-import { AuthResolver } from  './auth.resolver'
+import { Module, forwardRef } from '@nestjs/common';
+import { AuthResolver } from './auth.resolver';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { TokenService } from './token.service';
 import { UserModule } from '@/modules/user/user.module';
-import { ConfigModule,ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RefreshJwtStrategy } from './strategies/refresh-jwt.strategy';
 import { AccessTokenGuard } from '@/modules/auth/guards/jwt-access-auth.guard';
 import { RefreshTokenGuard } from '@/modules/auth/guards/jwt-refresh-auth.guard';
 import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
-import { AccessJwtStrategy }  from './strategies/access-jwt.strategy';
+import { AccessJwtStrategy } from './strategies/access-jwt.strategy';
 import { UserUtilsService } from '@/modules/user/services/user-utils.service';
 import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified-error.strategy';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -23,9 +24,30 @@ import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified
         secret: configService.get<string>('JWT_SECRET'),
       }),
     }),
+    HttpModule,
   ],
-  providers: [AuthResolver, AuthService,TokenService, AccessJwtStrategy,RefreshJwtStrategy,AccessTokenGuard, RefreshTokenGuard, CombinedAuthGuard, UserUtilsService,UnifiedErrorStrategyImpl],
-  exports: [AuthResolver, AuthService,TokenService, AccessJwtStrategy,RefreshJwtStrategy,AccessTokenGuard, RefreshTokenGuard, CombinedAuthGuard, UserUtilsService],
+  providers: [
+    AuthResolver,
+    AuthService,
+    TokenService,
+    AccessJwtStrategy,
+    RefreshJwtStrategy,
+    AccessTokenGuard,
+    RefreshTokenGuard,
+    CombinedAuthGuard,
+    UserUtilsService,
+    UnifiedErrorStrategyImpl,
+  ],
+  exports: [
+    AuthResolver,
+    AuthService,
+    TokenService,
+    AccessJwtStrategy,
+    RefreshJwtStrategy,
+    AccessTokenGuard,
+    RefreshTokenGuard,
+    CombinedAuthGuard,
+    UserUtilsService,
+  ],
 })
-
 export class AuthModule {}

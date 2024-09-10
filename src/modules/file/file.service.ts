@@ -28,14 +28,13 @@ export class GridFsService {
   }
 
   async getFileMetadata(id: string): Promise<any> {
-    const file = await this.gridFsBucket.find({ _id: new ObjectId(id) }).toArray();
+    const file = await this.gridFsBucket
+      .find({ _id: new ObjectId(id) })
+      .toArray();
     return file[0];
   }
 
-  async uploadFile(
-    file: FileUpload,
-    req: any,
-  ): Promise<any> {
+  async uploadFile(file: FileUpload, req: any): Promise<any> {
     const { createReadStream, filename } = file;
     const uploadStream = this.gridFsBucket.openUploadStream(filename);
     createReadStream().pipe(uploadStream);
@@ -45,13 +44,11 @@ export class GridFsService {
     const fileUrl = `${backendUrl}/files/${fileId}`;
     const { id } = await this.tokenService.processToken(req);
     await this.userService.updateUser(id, { avatarUrl: fileUrl });
-    return new Promise((
-      resolve,
-      reject,
-    ) => {
-      uploadStream.on('finish', async () => {
-        resolve({ _id: uploadStream.id, filename, fileUrl });
-      })
+    return new Promise((resolve, reject) => {
+      uploadStream
+        .on('finish', async () => {
+          resolve({ _id: uploadStream.id, filename, fileUrl });
+        })
         .on('error', (error) => {
           reject(error);
         });
@@ -67,7 +64,8 @@ export class GridFsService {
       const timeoutId = setTimeout(() => {
         resolve(false);
       }, 10000);
-      this.gridFsBucket.delete(new ObjectId(fileId))
+      this.gridFsBucket
+        .delete(new ObjectId(fileId))
         .then(() => {
           clearTimeout(timeoutId);
           resolve(true);
@@ -78,5 +76,4 @@ export class GridFsService {
         });
     });
   }
-
 }

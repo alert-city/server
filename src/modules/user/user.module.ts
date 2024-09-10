@@ -10,14 +10,13 @@ import { UserUtilsService } from '@/modules/user/services/user-utils.service';
 import { UserPasswordService } from '@/modules/user/services/user.password.service';
 import { NotificationModule } from '@/modules/notification/notification.module';
 import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified-error.strategy';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
     forwardRef(() => NotificationModule),
-    MongooseModule.forFeature([
-      { name: 'User', schema: UserSchema },
-    ]),
+    MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -25,9 +24,15 @@ import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified
         secret: configService.get<string>('JWT_SECRET'),
       }),
     }),
+    HttpModule,
   ],
-  providers: [UserService, UserResolver, UserUtilsService, UserPasswordService, UnifiedErrorStrategyImpl],
+  providers: [
+    UserService,
+    UserResolver,
+    UserUtilsService,
+    UserPasswordService,
+    UnifiedErrorStrategyImpl,
+  ],
   exports: [UserService, UserUtilsService, MongooseModule],
 })
-export class UserModule {
-}
+export class UserModule {}

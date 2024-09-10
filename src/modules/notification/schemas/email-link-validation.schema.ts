@@ -16,5 +16,5 @@ export class EmailLinkValidation {
   newUsername: string;
 }
 
-export const EmailLinkValidationSchema = SchemaFactory.createForClass(EmailLinkValidation);
-
+export const EmailLinkValidationSchema =
+  SchemaFactory.createForClass(EmailLinkValidation);
