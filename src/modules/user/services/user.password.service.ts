@@ -17,8 +17,8 @@ export class UserPasswordService {
   constructor(
     private readonly userService: UserService,
     private readonly userUtilsService: UserUtilsService,
-    @InjectModel(
-      'EmailCodeValidation') private readonly EmailCodeValidationModel: Model<EmailCodeValidationResponseDto>,
+    @InjectModel('EmailCodeValidation')
+    private readonly EmailCodeValidationModel: Model<EmailCodeValidationResponseDto>,
     private readonly unifiedErrorStrategy: UnifiedErrorStrategyImpl,
     private readonly i18nService: I18nService,
   ) {
@@ -31,33 +31,53 @@ export class UserPasswordService {
 
   async resetPassword(
     username: string,
-    input: ResetPasswordRequestDto
+    input: ResetPasswordRequestDto,
   ): Promise<boolean> {
+    const isAccountTypeOAuth =
+      await this.userUtilsService.isAccountTypeOAuth(username);
+    await this.errorContext.execute({
+      type: 'TRUE_OR_FALSE',
+      trueOrFalse: !isAccountTypeOAuth,
+      message: this.t('OAuthAccountResetPassword'),
+    });
     const user = await this.userService.findUserByUsername(username);
-    await this.errorContext.execute(
-      {
-        type: 'IS_SINGLE_OBJ_EXIST', singleObj: user, message: this.t('usernameNotExists'),
-        code: NOT_FOUND_ERROR,
-      });
+    await this.errorContext.execute({
+      type: 'IS_SINGLE_OBJ_EXIST',
+      singleObj: user,
+      message: this.t('usernameNotExists'),
+      code: NOT_FOUND_ERROR,
+    });
     const id = user.id;
-    const records = await this.EmailCodeValidationModel.find({ userId: id }).sort({ createdAt: -1 }).exec();
+    const records = await this.EmailCodeValidationModel.find({ userId: id })
+      .sort({ createdAt: -1 })
+      .exec();
     const latestRecord = records[0];
     const storedPassword = user.password;
-    await this.errorContext.execute(
-      {
-        type: 'IS_SINGLE_OBJ_EXIST', singleObj: latestRecord, message: this.t('verificationCodeNotMatch'),
-        code: NOT_FOUND_ERROR,
-      });
+    await this.errorContext.execute({
+      type: 'IS_SINGLE_OBJ_EXIST',
+      singleObj: latestRecord,
+      message: this.t('verificationCodeNotMatch'),
+      code: NOT_FOUND_ERROR,
+    });
     const { verificationCode, expires } = latestRecord;
     input.verificationCode = input.verificationCode.trim();
     await this.errorContext.execute({
-      type: 'COMPARE_TWO_STRINGS_NOT_EQUAL', string: { string1: input.verificationCode, string2: verificationCode },
+      type: 'COMPARE_TWO_STRINGS_NOT_EQUAL',
+      string: { string1: input.verificationCode, string2: verificationCode },
       message: this.t('verificationCodeNotMatch'),
     });
-    await this.errorContext.execute(
-      { type: 'IS_PASSWORD_SAME', password: { passwordFromFE: input.password, passwordFromDB: storedPassword } });
-    await this.errorContext.execute(
-      { type: 'IS_EXPIRED', expires: expires, message: this.t('verificationCodeExpired') });
+    await this.errorContext.execute({
+      type: 'IS_PASSWORD_SAME',
+      password: {
+        passwordFromFE: input.password,
+        passwordFromDB: storedPassword,
+      },
+    });
+    await this.errorContext.execute({
+      type: 'IS_EXPIRED',
+      expires: expires,
+      message: this.t('verificationCodeExpired'),
+    });
     input.password = await this.userUtilsService.hashPassword(input.password);
     await this.userService.updateUser(id, { password: input.password });
     await this.EmailCodeValidationModel.deleteMany({ userId: id });

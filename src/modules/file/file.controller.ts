@@ -1,4 +1,16 @@
-import { BadRequestException, Controller, Get, HttpStatus, Param, Post, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  Req,
+  Res,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { GridFsService } from './file.service';
 import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
@@ -24,7 +36,9 @@ export class FilesController {
     });
 
     fileStream.pipe(res).on('error', () => {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('Failed to download file');
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Failed to download file');
     });
   }
 
@@ -46,5 +60,4 @@ export class FilesController {
       req,
     );
   }
-
 }

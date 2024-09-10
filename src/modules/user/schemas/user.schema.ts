@@ -63,7 +63,12 @@ export class User {
 
   @Prop({ type: Boolean })
   isFirstLogin: boolean;
+
+  @Prop({ type: String })
+  googleId: string;
+
+  @Prop({ type: String })
+  facebookId: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-

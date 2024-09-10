@@ -13,7 +13,6 @@ export interface RefreshTokenResponse {
   accessTokenFromDB: string;
 }
 
-
 @Injectable()
 export class TokenService {
   private readonly errorContext: ErrorContext;
@@ -44,7 +43,9 @@ export class TokenService {
       }
     }
     await this.errorContext.execute({
-      type: 'TRUE_OR_FALSE', trueOrFalse: accessTokenFromRequest, message: this.t('accessTokenNotExists'),
+      type: 'TRUE_OR_FALSE',
+      trueOrFalse: accessTokenFromRequest,
+      message: this.t('accessTokenNotExists'),
       code: NOT_FOUND_ERROR,
     });
     let id: string;
@@ -53,11 +54,12 @@ export class TokenService {
     const decoded = this.jwtService.decode(accessTokenFromRequest);
     id = decoded.id;
     const foundUser = await this.userService.findOneUser(id);
-    await this.errorContext.execute(
-      {
-        type: 'IS_SINGLE_OBJ_EXIST', singleObj: foundUser, message: this.t('idNotFound'),
-        code: NOT_FOUND_ERROR,
-      });
+    await this.errorContext.execute({
+      type: 'IS_SINGLE_OBJ_EXIST',
+      singleObj: foundUser,
+      message: this.t('idNotFound'),
+      code: NOT_FOUND_ERROR,
+    });
     refreshTokenFromDB = foundUser.refreshToken;
     accessTokenFromDB = foundUser.accessToken;
     req.headers['Refresh-Token'] = refreshTokenFromDB;

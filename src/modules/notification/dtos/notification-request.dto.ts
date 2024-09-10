@@ -4,7 +4,4 @@ import { Field, InputType } from '@nestjs/graphql';
 export class SendUpdateUsernameEmailRequestDto {
   @Field(() => String)
   newUsername: string;
-
-  @Field(() => Number)
-  emailInfoType: number;
 }

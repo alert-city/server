@@ -1,25 +1,25 @@
-import { Field, ObjectType} from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class EmailLinkValidationResponseDto {
-  @Field(()=> String)
+  @Field(() => String)
   userId: string;
 
-  @Field(()=> String)
+  @Field(() => String)
   activationToken: string;
 
-  @Field(()=> String)
+  @Field(() => String)
   newUsername: string;
 }
 
 @ObjectType()
 export class EmailCodeValidationResponseDto {
-  @Field(()=> String)
+  @Field(() => String)
   userId: string;
 
-  @Field(()=> String)
+  @Field(() => String)
   verificationCode: string;
 
-  @Field(()=> Date)
+  @Field(() => Date)
   expires: Date;
 }

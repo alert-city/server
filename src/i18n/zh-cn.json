@@ -71,5 +71,9 @@
         }
       }
     }
-  }
+  },
+  "OAuthValidation": "OAuth Token 验证失败",
+  "OAuthAccount": "此账户是第三方账户，请通过快速登录功能登录",
+  "OAuthAccountResetPassword": "此账户是第三方账户，您无法重置密码",
+  "recaptchaError": "reCAPTCHA 验证失败"
 }

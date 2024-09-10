@@ -71,5 +71,9 @@
         }
       }
     }
-  }
+  },
+  "OAuthValidation": "OAuth Token validation failed",
+  "OAuthAccount": "This account is a third-party account. Please log in with the Quick Login button",
+  "OAuthAccountResetPassword": "This account is a third-party account. You cannot reset your password",
+  "recaptchaError": "reCAPTCHA verification failed"
 }
