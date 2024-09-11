@@ -175,10 +175,6 @@ export class AuthService {
     providerId: string,
     username: string,
   ): Promise<boolean> {
-    const clientID =
-      OAuthProvider === 'google'
-        ? this.configService.get('GOOGLE_CLIENT_ID')
-        : this.configService.get('FACEBOOK_CLIENT_ID');
     const urlEnum = {
       google: 'https://oauth2.googleapis.com/tokeninfo?access_token=',
       facebook: 'https://graph.facebook.com/me',
@@ -187,7 +183,7 @@ export class AuthService {
     const response = await lastValueFrom(
       this.httpService.get(url).pipe(
         map((res) => res.data),
-        catchError((error) => {
+        catchError(() => {
           throw new Error('Invalid Google access token');
         }),
       ),
