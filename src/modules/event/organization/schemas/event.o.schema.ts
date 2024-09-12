@@ -35,6 +35,6 @@ export class Event extends Document {
 
     @Prop({type: String})
     orgName?: string;
-};
+}
 
-export const eventSchema = SchemaFactory.createForClass(Event);
+export const organizationEventSchema = SchemaFactory.createForClass(Event);

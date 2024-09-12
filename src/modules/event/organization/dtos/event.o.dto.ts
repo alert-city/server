@@ -1,8 +1,7 @@
-/* eslint-disable prettier/prettier */
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
-export class EventDto {
+export class OrganizationEventODto {
     @Field(() => ID)
     id: string;
 
@@ -35,7 +34,7 @@ export class EventDto {
 
     @Field(() => String, {nullable: true})
     orgName?: string;
-};
+}
 
 @InputType()
 export class CreateEventInput {
@@ -68,4 +67,4 @@ export class CreateEventInput {
 
     @Field(() => String, {nullable: true})
     orgName?: string;
-};
+}

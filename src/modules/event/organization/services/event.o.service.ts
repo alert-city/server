@@ -1,19 +1,19 @@
 import { Injectable } from "@nestjs/common";
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { EventDto, CreateEventInput } from "../dtos/event.dto";
+import { OrganizationEventODto, CreateEventInput } from "../dtos/event.o.dto";
 import { ErrorContext } from '@/common/adjustment-strategies/error-context';
 import { I18nService } from '@/modules/i18n/i18n.service';
 import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified-error.strategy';
 import { NOT_FOUND_ERROR } from "@/common/constants/code";
 
 @Injectable()
-export class EventService {
+export class OrganizationEventService {
     private readonly errorContext: ErrorContext;
 
     constructor(
         @InjectModel('Event')
-        private readonly eventModel: Model<EventDto>,
+        private readonly eventModel: Model<OrganizationEventODto>,
         private readonly unifiedErrorStrategy: UnifiedErrorStrategyImpl,
         private readonly i18nService: I18nService,
     ) {
@@ -24,7 +24,7 @@ export class EventService {
         return this.i18nService.getTranslation(key);
     }
 
-    async findAllEvents(): Promise<EventDto[]> {
+    async findAllEvents(): Promise<OrganizationEventODto[]> {
         const allEvents = await this.eventModel.find();
         await this.errorContext.execute({
             type: 'IS_ARRAY_OBJ_EMPTY',
@@ -35,7 +35,7 @@ export class EventService {
         return allEvents;
     }
 
-    async findEventsByType(eventType: string): Promise<EventDto[]> {
+    async findEventsByType(eventType: string): Promise<OrganizationEventODto[]> {
         const allEvents = await this.eventModel.find({
             eventType: eventType
         });
@@ -48,7 +48,7 @@ export class EventService {
         return allEvents;
     }
 
-    async findEventsByDate(date_: string): Promise<EventDto[]> {
+    async findEventsByDate(date_: string): Promise<OrganizationEventODto[]> {
         const allEvents = await this.eventModel.find({
             date: date_
         });
@@ -61,7 +61,7 @@ export class EventService {
         return allEvents;
     }
 
-    async findEventsBySubmitter(submitter: string): Promise<EventDto[]> {
+    async findEventsBySubmitter(submitter: string): Promise<OrganizationEventODto[]> {
         const allEvents = await this.eventModel.find({
             submitter: submitter
         });
@@ -74,7 +74,7 @@ export class EventService {
         return allEvents;
     }
 
-    async findEventsByOrgName(orgName: string): Promise<EventDto[]> {
+    async findEventsByOrgName(orgName: string): Promise<OrganizationEventODto[]> {
         const allEvents = await this.eventModel.find({
             orgName: orgName
         });
@@ -87,7 +87,7 @@ export class EventService {
         return allEvents;
     }
 
-    async createEvent(input: CreateEventInput): Promise<EventDto> {
+    async createEvent(input: CreateEventInput): Promise<OrganizationEventODto> {
         const newEvent = await this.eventModel.create(input);
         if (!newEvent) {
             await this.errorContext.execute({
@@ -96,4 +96,4 @@ export class EventService {
         }
         return newEvent;
     }
-};
+}

@@ -13,8 +13,9 @@ import { FileModule } from './modules/file/file.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { I18nModule } from '@/modules/i18n/i18n.module';
 import { LocaleMiddleware } from '@/modules/i18n/localeMiddleware';
-import { EventModule } from './modules/event/event.module';
+import { OrganizationEventOModule } from './modules/event/organization/event.o.module';
 import * as process from 'node:process';
+import { PersonalEventModule } from './modules/event/personal/event.p.module';
 
 @Module({
   imports: [
@@ -42,7 +43,8 @@ import * as process from 'node:process';
       context: ({ req, res }) => ({ req, res }),
     }),
     UserModule,
-    EventModule
+    OrganizationEventOModule,
+    PersonalEventModule,
   ],
   providers: [
     {
