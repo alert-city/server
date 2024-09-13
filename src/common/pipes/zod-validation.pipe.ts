@@ -44,10 +44,7 @@ export class ZodValidationPipe implements PipeTransform {
       return schema.parse(value);
     } catch (error) {
       if (error instanceof ZodError) {
-        throw new CustomException(
-          `Zod Validation Failed: ${error.message}`,
-          VALIDATION_ERROR,
-        );
+        throw new CustomException('Zod Validation Failed', VALIDATION_ERROR);
       }
     }
   }

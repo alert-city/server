@@ -38,7 +38,7 @@ export const createUserSchema = z
       .min(1, 'Organization name cannot be empty')
       .max(255)
       .optional(),
-    captchaToken: z.string().min(1, 'Captcha token cannot be empty'),
+    captchaToken: z.string().min(1, 'Captcha token cannot be empty').optional(),
     phoneNumber: z
       .string()
       .min(1, 'Phone number cannot be empty')

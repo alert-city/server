@@ -30,7 +30,7 @@ import * as process from 'node:process';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
-      introspection: process.env.NODE_ENV === 'development',
+      // introspection: process.env.NODE_ENV === 'development',
       csrfPrevention: false,
       formatError: (error) => {
         return {
