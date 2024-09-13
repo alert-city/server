@@ -31,6 +31,7 @@ import * as process from 'node:process';
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
       // introspection: process.env.NODE_ENV === 'development',
+      introspection: true,
       csrfPrevention: false,
       formatError: (error) => {
         return {
