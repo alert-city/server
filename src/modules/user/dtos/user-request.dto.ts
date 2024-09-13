@@ -68,7 +68,7 @@ export class UserRequestDto extends BaseUserRequestDto {
   @Field(() => String)
   phoneNumber: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   captchaToken?: string;
 
   @Field(() => String, { nullable: true })
