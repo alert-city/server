@@ -3,7 +3,9 @@ import { AsyncLocalStorage } from 'async_hooks';
 
 @Injectable()
 export class LocaleStorageService {
-  private readonly asyncLocalStorage = new AsyncLocalStorage<Map<string, any>>();
+  private readonly asyncLocalStorage = new AsyncLocalStorage<
+    Map<string, any>
+  >();
 
   setLocale(locale: string) {
     const store = this.asyncLocalStorage.getStore();

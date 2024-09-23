@@ -27,7 +27,11 @@ import { I18nModule } from '@/modules/i18n/i18n.module';
     UserModule,
   ],
   controllers: [FilesController],
-  providers: [TokenService, GridFsService, UnifiedErrorStrategyImpl, I18nService],
+  providers: [
+    TokenService,
+    GridFsService,
+    UnifiedErrorStrategyImpl,
+    I18nService,
+  ],
 })
-export class FileModule {
-}
+export class FileModule {}

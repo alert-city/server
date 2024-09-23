@@ -11,14 +11,13 @@ import { UserPasswordService } from '@/modules/user/services/user.password.servi
 import { NotificationModule } from '@/modules/notification/notification.module';
 import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified-error.strategy';
 import { PubSub } from 'graphql-subscriptions';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
     forwardRef(() => NotificationModule),
-    MongooseModule.forFeature([
-      { name: 'User', schema: UserSchema },
-    ]),
+    MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -26,13 +25,19 @@ import { PubSub } from 'graphql-subscriptions';
         secret: configService.get<string>('JWT_SECRET'),
       }),
     }),
+    HttpModule,
   ],
-  providers: [UserService, UserResolver, UserUtilsService, UserPasswordService, UnifiedErrorStrategyImpl,
+  providers: [
+    UserService,
+    UserResolver,
+    UserUtilsService,
+    UserPasswordService,
+    UnifiedErrorStrategyImpl,
     {
       provide: 'PUB_SUB',
       useValue: new PubSub()
-    }],
+    }
+  ],
   exports: [UserService, UserUtilsService, MongooseModule],
 })
-export class UserModule {
-}
+export class UserModule {}

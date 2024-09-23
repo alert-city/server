@@ -24,6 +24,8 @@
   "accessTokenNotMatch": "Access token not match",
   "bothTokenInvalid": "Both tokens are invalid, please re-login",
   "verificationCodeExpired": "Verification code is expired",
+  "eventsNotFound": "Events not found",
+  "createEventError": "Create event error",
   "usernameExistsNotActivated": "Username already exists but not activated",
   "email": {
     "expiration": {
@@ -69,5 +71,9 @@
         }
       }
     }
-  }
+  },
+  "OAuthValidation": "OAuth Token validation failed",
+  "OAuthAccount": "This account is a third-party account. Please log in with the Quick Login button",
+  "OAuthAccountResetPassword": "This account is a third-party account. You cannot reset your password",
+  "recaptchaError": "reCAPTCHA verification failed"
 }

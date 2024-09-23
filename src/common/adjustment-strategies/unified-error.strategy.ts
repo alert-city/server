@@ -16,33 +16,52 @@ import { I18nService } from '@/modules/i18n/i18n.service';
 @Injectable()
 export class UnifiedErrorStrategyImpl implements UnifiedErrorStrategy {
   constructor(
-    @Inject(forwardRef(() => UserUtilsService)) private readonly userUtilsService: UserUtilsService,
+    @Inject(forwardRef(() => UserUtilsService))
+    private readonly userUtilsService: UserUtilsService,
     private readonly i18nService: I18nService,
-  ) {
-  }
+  ) {}
 
   private t(key: string): string {
     return this.i18nService.getTranslation(key);
   }
 
   async execute(input: {
-    type: string; username?: string; orgName?: string; singleObj?: any; arrayObj?: any; message?: string; id?: string;
-    code?: number; codeName?: string; string: { string1?: string; string2?: string }; user?: any;
-    password?: { passwordFromFE: string, passwordFromDB: string };
-    trueOrFalse?: boolean; expires?: Date;
+    type: string;
+    username?: string;
+    orgName?: string;
+    singleObj?: any;
+    arrayObj?: any;
+    message?: string;
+    id?: string;
+    code?: number;
+    codeName?: string;
+    string: { string1?: string; string2?: string };
+    user?: any;
+    password?: { passwordFromFE: string; passwordFromDB: string };
+    trueOrFalse?: boolean;
+    expires?: Date;
   }): Promise<void> {
     switch (input.type) {
       case 'USERNAME_EXISTS':
-        const isUsernameTaken = await this.userUtilsService.isUsernameTaken(input.username);
+        const isUsernameTaken = await this.userUtilsService.isUsernameTaken(
+          input.username,
+        );
         if (isUsernameTaken) {
           throw new CustomException(this.t('usernameExists'), CONFLICT_ERROR);
         }
         break;
 
       case 'USERNAME_EXISTS_NOT_ACTIVATE':
-        const { result, id } = await this.userUtilsService.isUsernameTakenNotActivate(input.username);
+        const { result, id } =
+          await this.userUtilsService.isUsernameTakenNotActivate(
+            input.username,
+          );
         if (result === true) {
-          throw new CustomException(this.t('usernameExistsNotActivate'), ACCOUNT_NOT_ACTIVATED, id);
+          throw new CustomException(
+            this.t('usernameExistsNotActivated'),
+            ACCOUNT_NOT_ACTIVATED,
+            id,
+          );
         }
         if (result === false) {
           throw new CustomException(this.t('usernameExists'), CONFLICT_ERROR);
@@ -50,9 +69,14 @@ export class UnifiedErrorStrategyImpl implements UnifiedErrorStrategy {
         break;
 
       case 'ORGANIZATION_EXISTS':
-        const isOrganizationExist = await this.userUtilsService.isOrgExist(input.orgName);
+        const isOrganizationExist = await this.userUtilsService.isOrgExist(
+          input.orgName,
+        );
         if (isOrganizationExist) {
-          throw new CustomException(this.t('organizationExists'), CONFLICT_ERROR);
+          throw new CustomException(
+            this.t('organizationExists'),
+            CONFLICT_ERROR,
+          );
         }
         break;
 
@@ -70,7 +94,10 @@ export class UnifiedErrorStrategyImpl implements UnifiedErrorStrategy {
 
       case 'ID_VALIDATION':
         if (!Types.ObjectId.isValid(input.id)) {
-          throw new CustomException(this.t('invalidIdFormat'), VALIDATION_ERROR);
+          throw new CustomException(
+            this.t('invalidIdFormat'),
+            VALIDATION_ERROR,
+          );
         }
         break;
 
@@ -92,42 +119,68 @@ export class UnifiedErrorStrategyImpl implements UnifiedErrorStrategy {
           const hasFirstName = 'firstName' in input.singleObj;
           const hasLastName = 'lastName' in input.singleObj;
           if (hasFirstName || hasLastName) {
-            throw new CustomException(this.t('organizationCannotUpdateName'), FORBIDDEN_ERROR);
+            throw new CustomException(
+              this.t('organizationCannotUpdateName'),
+              FORBIDDEN_ERROR,
+            );
           }
         }
         if (accountType === 'Personal') {
           const hasOrgName = 'orgName' in input.singleObj;
           if (hasOrgName) {
-            throw new CustomException(this.t('personalCannotUpdateOrgName'), FORBIDDEN_ERROR);
+            throw new CustomException(
+              this.t('personalCannotUpdateOrgName'),
+              FORBIDDEN_ERROR,
+            );
           }
         }
         break;
 
       case 'IS_ACCOUNT_ACTIVATED':
         if (!input.singleObj?.isAccountActivated) {
-          throw new CustomException(this.t('accountNotActivated'), ACCOUNT_NOT_ACTIVATED, input.id);
+          throw new CustomException(
+            this.t('accountNotActivated'),
+            ACCOUNT_NOT_ACTIVATED,
+            input.id,
+          );
         }
         break;
 
       case 'NORMAL_ACCOUNT_NOT_ALLOWED':
-        if (!input.singleObj.role?.includes('staff') && !input.singleObj.role?.includes('admin')) {
-          throw new CustomException(this.t('normalAccountNotAllowed'), FORBIDDEN_ERROR);
+        if (
+          !input.singleObj.role?.includes('staff') &&
+          !input.singleObj.role?.includes('admin')
+        ) {
+          throw new CustomException(
+            this.t('normalAccountNotAllowed'),
+            FORBIDDEN_ERROR,
+          );
         }
         break;
 
       case 'IS_PASSWORD_VALID':
         const isPasswordValid = await this.userUtilsService.comparePassword(
-          input.password.passwordFromFE, input.password.passwordFromDB);
+          input.password.passwordFromFE,
+          input.password.passwordFromDB,
+        );
         if (!isPasswordValid) {
-          throw new CustomException(this.t('passwordNotMatch'), AUTHORIZATION_ERROR);
+          throw new CustomException(
+            this.t('passwordNotMatch'),
+            AUTHORIZATION_ERROR,
+          );
         }
         break;
 
       case 'IS_PASSWORD_SAME':
         const isPasswordSame = await this.userUtilsService.comparePassword(
-          input.password.passwordFromFE, input.password.passwordFromDB);
+          input.password.passwordFromFE,
+          input.password.passwordFromDB,
+        );
         if (isPasswordSame) {
-          throw new CustomException(this.t('newPasswordCannotBeSame'), AUTHORIZATION_ERROR);
+          throw new CustomException(
+            this.t('newPasswordCannotBeSame'),
+            AUTHORIZATION_ERROR,
+          );
         }
         break;
 
@@ -147,9 +200,11 @@ export class UnifiedErrorStrategyImpl implements UnifiedErrorStrategy {
         }
         break;
 
-
       default:
-        throw new CustomException(this.t('invalidErrorType'), INTERNAL_SERVER_ERROR);
+        throw new CustomException(
+          this.t('invalidErrorType'),
+          INTERNAL_SERVER_ERROR,
+        );
     }
   }
 }

@@ -5,13 +5,22 @@ import { OrganizationEventService } from "@/modules/event/organization/event.o.s
 import { OrganizationEventResolver } from "@/modules/event/organization/event.o.resolver";
 import { UnifiedErrorStrategyImpl } from '@/common/adjustment-strategies/unified-error.strategy';
 import { UserModule } from "@/modules/user/user.module";
+import { PubSub } from 'graphql-subscriptions';
 
 @Module({
     imports: [
-        MongooseModule.forFeature([{name: 'Event', schema: organizationEventSchema}]),
+        MongooseModule.forFeature([{ name: 'Event', schema: organizationEventSchema }]),
         UserModule
     ],
-    providers: [OrganizationEventService, OrganizationEventResolver, UnifiedErrorStrategyImpl],
+    providers: [
+        OrganizationEventService,
+        OrganizationEventResolver,
+        UnifiedErrorStrategyImpl,
+        {
+            provide: 'PUB_SUB',
+            useValue: new PubSub()
+        }
+    ],
     exports: [OrganizationEventService],
 })
-export class OrganizationEventOModule {}
+export class OrganizationEventOModule { }

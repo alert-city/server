@@ -1,7 +1,10 @@
 import { Args, Mutation, Query, Resolver, Int, Context,Subscription } from '@nestjs/graphql';
 import { UserService } from './services/user.service';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
-import { ResetPasswordRequestDto, UserRequestDto } from '@/modules/user/dtos/user-request.dto';
+import {
+  ResetPasswordRequestDto,
+  UserRequestDto,
+} from '@/modules/user/dtos/user-request.dto';
 import { UseGuards } from '@nestjs/common';
 import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
 import { UpdateUserRequestDto } from '@/modules/user/dtos/user-request.dto';
@@ -33,26 +36,26 @@ export class UserResolver {
 
   @Query(() => UserResponseDto)
   @UseGuards(CombinedAuthGuard)
-  async findUserByUsername(@Args('username') username: string): Promise<UserResponseDto> {
+  async findUserByUsername(
+    @Args('username') username: string,
+  ): Promise<UserResponseDto> {
     return await this.userService.findUserByUsername(username);
   }
 
   @Mutation(() => UserResponseDto)
   async createUser(
-    @Args(
-      'input') input: UserRequestDto,
-    @Context() context: any,
+    @Args('input') input: UserRequestDto,
+    @Args('platform') platform: string,
   ): Promise<UserResponseDto> {
-    const locale = context.req.cookies['NEXT_LOCALE']
-    return await this.userService.createUser(input, locale);
+    return await this.userService.createUser(input, platform);
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => UserResponseDto)
   @UseGuards(CombinedAuthGuard)
   async updateUser(
     @Args('id') id: string,
     @Args('input') input: UpdateUserRequestDto,
-  ): Promise<boolean> {
+  ): Promise<UserResponseDto> {
     return await this.userService.updateUser(id, input);
   }
 
@@ -72,7 +75,10 @@ export class UserResolver {
     @Args('username') username: string,
     @Args('emailInfoType', { type: () => Int }) emailInfoType: number,
   ): Promise<boolean> {
-    return await this.userService.sendVerificationCodeEmail(username, emailInfoType);
+    return await this.userService.sendVerificationCodeEmail(
+      username,
+      emailInfoType,
+    );
   }
 
   @Mutation(() => Boolean)
@@ -95,11 +101,13 @@ export class UserResolver {
   async resendActivationLinkEmail(
     @Args('id') id: string,
     @Args('emailInfoType', { type: () => Int }) emailInfoType: number,
-    @Context() context: any,
     @Args('newUsername', { nullable: true }) newUsername?: string,
   ): Promise<boolean> {
-    const locale = context.req.cookies['NEXT_LOCALE']
-    return await this.userService.resendActivationLinkEmail({ id, emailInfoType, newUsername, locale });
+    return await this.userService.resendActivationLinkEmail({
+      id,
+      emailInfoType,
+      newUsername,
+    });
   }
 
   @Mutation(() => Boolean)
@@ -107,9 +115,7 @@ export class UserResolver {
   async sendUpdateUsernameEmail(
     @Args('id') id: string,
     @Args('input') input: SendUpdateUsernameEmailRequestDto,
-    @Context() context: any,
   ): Promise<boolean> {
-    const locale = context.req.cookies['NEXT_LOCALE']
-    return await this.userService.sendUpdateUsernameEmail(id, input, locale);
+    return await this.userService.sendUpdateUsernameEmail(id, input);
   }
 }

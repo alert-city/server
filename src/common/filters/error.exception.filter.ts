@@ -1,4 +1,10 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { GqlArgumentsHost } from '@nestjs/graphql';
 import { ApolloError } from 'apollo-server-express';
 
@@ -18,16 +24,14 @@ export class GqlHttpExceptionFilter implements ExceptionFilter {
       const request = ctx.getRequest();
       const path = request.url;
 
-      response
-        .status(status)
-        .json({
-          statusCode: status,
-          message: message,
-          code: code,
-          data: data,
-          path: path,
-        });
-    } else  {
+      response.status(status).json({
+        statusCode: status,
+        message: message,
+        code: code,
+        data: data,
+        path: path,
+      });
+    } else {
       const gqlHost = GqlArgumentsHost.create(host);
       const gqlInfo = gqlHost.getInfo();
       const operationName = gqlInfo.operation.name?.value;
@@ -38,7 +42,7 @@ export class GqlHttpExceptionFilter implements ExceptionFilter {
       const data = response?.data || null;
       const code = response?.code || 'Customized Code Here';
 
-      throw new ApolloError(message,code, {
+      throw new ApolloError(message, code, {
         status: statusCode,
         message: message,
         data: data,

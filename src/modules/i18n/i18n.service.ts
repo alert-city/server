@@ -7,8 +7,7 @@ import { LocaleStorageService } from './locale-storage.service';
 export class I18nService {
   private readonly translations = { en, zhCn };
 
-  constructor(private readonly localeStorageService: LocaleStorageService) {
-  }
+  constructor(private readonly localeStorageService: LocaleStorageService) {}
 
   getTranslation(key: string): string {
     let locale = this.localeStorageService.getLocale() || 'en';

@@ -10,7 +10,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   app.enableCors({
-    origin: ['https://alertcity.sanfenginn.com', 'http://localhost:3000', 'http://13.239.162.77:3000', 'http://13.239.162.77'],
+    origin: [
+      'https://alertcity.sanfenginn.com',
+      'http://localhost:3000',
+      'http://13.239.162.77:3000',
+      'http://13.239.162.77',
+    ],
     exposedHeaders: ['Auth-Status', 'New-Access-Token'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
@@ -26,5 +31,4 @@ async function bootstrap() {
   console.log(`Server is running on http://localhost:${port}`);
 }
 
-bootstrap().then(() => {
-});
+bootstrap().then(() => {});

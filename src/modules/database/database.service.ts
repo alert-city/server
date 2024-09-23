@@ -11,7 +11,9 @@ export class DatabaseService implements OnModuleInit {
   async onModuleInit() {
     this.logger.log('Initializing database connection...');
     if (this.connection.readyState === 1) {
-      this.logger.log('Database connection established successfully (already open).');
+      this.logger.log(
+        'Database connection established successfully (already open).',
+      );
     } else {
       this.connection.once('open', () => {
         this.logger.log('Database connection established successfully');

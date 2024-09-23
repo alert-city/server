@@ -18,5 +18,5 @@ export class EmailCodeValidation {
   expires: Date;
 }
 
-export const EmailCodeValidationSchema = SchemaFactory.createForClass(EmailCodeValidation);
-
+export const EmailCodeValidationSchema =
+  SchemaFactory.createForClass(EmailCodeValidation);
