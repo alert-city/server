@@ -16,7 +16,7 @@ export class OrganizationEventService {
         private readonly eventModel: Model<OrganizationEventODto>,
         private readonly unifiedErrorStrategy: UnifiedErrorStrategyImpl,
         private readonly i18nService: I18nService,
-        @Inject('PUB_SUB') private readonly pubsub: PubSub
+        @Inject('PUB_SUB') private readonly pubSub: PubSub
     ) {
         this.errorContext = new ErrorContext(this.unifiedErrorStrategy);
     }
@@ -96,7 +96,7 @@ export class OrganizationEventService {
             });
         }
         if (newEvent) {
-            await this.pubsub.publish('eventCreated', {newEvent: newEvent})
+            await this.pubSub.publish('eventCreated', {newEvent: newEvent})
         }
         return newEvent;
     }
@@ -116,7 +116,7 @@ export class OrganizationEventService {
             });
         }
         if (updatedEvent) {
-            await this.pubsub.publish('eventUpdated', {updatedEvent: updatedEvent})
+            await this.pubSub.publish('eventUpdated', {updatedEvent: updatedEvent})
         }
         return updatedEvent;
     }

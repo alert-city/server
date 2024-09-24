@@ -123,6 +123,7 @@ export class UserService {
       new: true,
     }).select('-password').exec();
     if (updatedUser) {
+      console.log("userUpdated published");
       await this.pubSub.publish('userUpdated', { userUpdated: updatedUser });
     }
     return updatedUser;

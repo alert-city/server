@@ -8,7 +8,7 @@ import { Inject } from "@nestjs/common";
 export class OrganizationEventResolver {
     constructor(
         private readonly eventService: OrganizationEventService,
-        @Inject('PUB_SUB') private readonly pubsub: PubSub
+        @Inject('PUB_SUB') private readonly pubSub: PubSub
     ) { }
 
     @Query(() => [OrganizationEventODto])
@@ -74,11 +74,13 @@ export class OrganizationEventResolver {
 
     @Subscription(() => OrganizationEventODto)
     eventCreated() {
-        return this.pubsub.asyncIterator('eventCreated');
+        console.log("eventCreated");
+        return this.pubSub.asyncIterator('eventCreated');
     }
 
     @Subscription(() => OrganizationEventODto)
     eventUpdated() {
-        return this.pubsub.asyncIterator('eventUpdated');
+        console.log("eventUpdated");
+        return this.pubSub.asyncIterator('eventUpdated');
     }
 }

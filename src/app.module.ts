@@ -33,6 +33,9 @@ import { PersonalEventModule } from './modules/event/personal/event.p.module';
       playground: true,
       introspection: process.env.NODE_ENV === 'development',
       csrfPrevention: false,
+      subscriptions: {
+        'graphql-ws': true,
+      },
       formatError: (error) => {
         return {
           message: error.message,

@@ -51,7 +51,7 @@ export class UserResolver {
   }
 
   @Mutation(() => UserResponseDto)
-  @UseGuards(CombinedAuthGuard)
+  // @UseGuards(CombinedAuthGuard)
   async updateUser(
     @Args('id') id: string,
     @Args('input') input: UpdateUserRequestDto,
@@ -61,6 +61,7 @@ export class UserResolver {
 
   @Subscription(()=> UserResponseDto)
   userUpdated() {
+    console.log("userUpdated subscribed");
     return this.pubSub.asyncIterator('userUpdated');
   }
 
