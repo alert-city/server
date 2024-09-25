@@ -89,35 +89,48 @@ export class OrganizationEventService {
     // Mutations
 
     async createEvent(input: CreateEventInput): Promise<OrganizationEventODto> {
-        const newEvent = await this.eventModel.create(input);
-        if (!newEvent) {
-            await this.errorContext.execute({
-                type: 'DIRECT_THROW', message: this.t("createEventError")
-            });
+        try {
+            const newEvent = await this.eventModel.create(input);
+            if (!newEvent) {
+                await this.errorContext.execute({
+                    type: 'DIRECT_THROW', message: this.t("createEventError")
+                });
+                return null;
+            }
+            console.log("eventCreated published:", newEvent);
+            await this.pubSub.publish('eventCreated', { eventCreated: newEvent });
+            return newEvent;
+        } catch (error) {
+            console.error('Error creating event: ', error);
+            throw new Error(this.t("createEventError"));
         }
-        if (newEvent) {
-            await this.pubSub.publish('eventCreated', {newEvent: newEvent})
-        }
-        return newEvent;
     }
 
     async updateEvent(input: UpdateEventInput): Promise<OrganizationEventODto> {
-        const updatedEvent = await this.eventModel.findByIdAndUpdate(
-            input.id,
-            {
-                isReviewed: input.isReviewed,
-                isApproved: input.isApproved,
-                reviewComment: input.reviewComment
+        try {
+            const updatedEvent = await this.eventModel.findByIdAndUpdate(
+                input.id,
+                {
+                    isReviewed: input.isReviewed,
+                    isApproved: input.isApproved,
+                    reviewComment: input.reviewComment
+                },
+                {new: true}
+            ).populate(
+                'submitter', 'firstName lastName'
+            ).exec();
+            if (!updatedEvent) {
+                await this.errorContext.execute({
+                    type: 'DIRECT_THROW', message: this.t("updateEventError")
+                });
+                return null;
             }
-        );
-        if (!updatedEvent) {
-            await this.errorContext.execute({
-                type: 'DIRECT_THROW', message: this.t("updateEventError")
-            });
+            console.log("eventUpdated published:", updatedEvent);
+            await this.pubSub.publish('eventUpdated', { eventUpdated: updatedEvent })
+            return updatedEvent;
+        } catch { Error } {
+            console.error('Error updating event: ', Error);
+            throw new Error(this.t("updateEventError"));
         }
-        if (updatedEvent) {
-            await this.pubSub.publish('eventUpdated', {updatedEvent: updatedEvent})
-        }
-        return updatedEvent;
     }
 };

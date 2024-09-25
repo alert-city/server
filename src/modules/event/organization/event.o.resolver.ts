@@ -74,13 +74,11 @@ export class OrganizationEventResolver {
 
     @Subscription(() => OrganizationEventODto)
     eventCreated() {
-        console.log("eventCreated");
         return this.pubSub.asyncIterator('eventCreated');
     }
 
     @Subscription(() => OrganizationEventODto)
     eventUpdated() {
-        console.log("eventUpdated");
         return this.pubSub.asyncIterator('eventUpdated');
     }
 }
