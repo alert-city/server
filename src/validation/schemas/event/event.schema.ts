@@ -11,4 +11,5 @@ export const createEventSchema = z.object({
     ERDate: z.string().optional(),
     submitter: z.string().min(1, "Submitter is required"),
     orgName: z.string().optional(),
+
 });
