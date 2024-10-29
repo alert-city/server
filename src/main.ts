@@ -19,7 +19,7 @@ async function bootstrap() {
     exposedHeaders: ['Auth-Status', 'New-Access-Token'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
   });
   app.use(compression());
   app.use(cookieParser());

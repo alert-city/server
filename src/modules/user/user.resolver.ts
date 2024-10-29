@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver, Int, Context } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver, Int, Context,Subscription } from '@nestjs/graphql';
 import { UserService } from './services/user.service';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import {
@@ -10,13 +10,17 @@ import { CombinedAuthGuard } from '@/modules/auth/guards/combined-auth.guard';
 import { UpdateUserRequestDto } from '@/modules/user/dtos/user-request.dto';
 import { UserPasswordService } from '@/modules/user/services/user.password.service';
 import { SendUpdateUsernameEmailRequestDto } from '@/modules/notification/dtos/notification-request.dto';
+import { PubSub } from 'graphql-subscriptions';
+import { Inject } from '@nestjs/common';
 
 @Resolver()
 export class UserResolver {
   constructor(
     private readonly userService: UserService,
     private readonly userResetPasswordService: UserPasswordService,
-  ) {}
+    @Inject('PUB_SUB') private readonly pubSub: PubSub,
+  ) {
+  }
 
   @Query(() => [UserResponseDto])
   @UseGuards(CombinedAuthGuard)
@@ -53,6 +57,12 @@ export class UserResolver {
     @Args('input') input: UpdateUserRequestDto,
   ): Promise<UserResponseDto> {
     return await this.userService.updateUser(id, input);
+  }
+
+  @Subscription(()=> UserResponseDto)
+  userUpdated() {
+    console.log("userUpdated subscribed");
+    return this.pubSub.asyncIterator('userUpdated');
   }
 
   @Mutation(() => Boolean)
