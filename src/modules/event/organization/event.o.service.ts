@@ -58,6 +58,7 @@ export class OrganizationEventService {
     }
 
     async findUnreviewedEventsByOrgName(orgName: string): Promise<OrganizationEventODto[]> {
+        console.log("orgName:", orgName);
         const allEvents = await this.eventModel.find({
             orgName: orgName,
             isReviewed: false
