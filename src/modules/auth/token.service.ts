@@ -32,22 +32,35 @@ export class TokenService {
 
   async processToken(req: Request): Promise<RefreshTokenResponse> {
     let accessTokenFromRequest = '';
-    const cookies = req.headers.cookie;
-    if (cookies) {
-      const cookieArray = cookies.split(';');
-      for (let cookie of cookieArray) {
-        cookie = cookie.trim();
-        if (cookie.startsWith('access_token=')) {
-          accessTokenFromRequest = cookie.substring('access_token='.length);
+
+    // 👇 1. 先从 Authorization header 读取
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      accessTokenFromRequest = authHeader.substring(7); // 去掉 "Bearer "
+    }
+
+    // 👇 2. 如果没有，再从 Cookie 读取
+    if (!accessTokenFromRequest) {
+      const cookies = req.headers.cookie;
+      if (cookies) {
+        const cookieArray = cookies.split(';');
+        for (let cookie of cookieArray) {
+          cookie = cookie.trim();
+          if (cookie.startsWith('access_token=')) {
+            accessTokenFromRequest = cookie.substring('access_token='.length);
+            break;
+          }
         }
       }
     }
+
     await this.errorContext.execute({
       type: 'TRUE_OR_FALSE',
       trueOrFalse: accessTokenFromRequest,
       message: this.t('accessTokenNotExists'),
       code: NOT_FOUND_ERROR,
     });
+
     let id: string;
     let accessTokenFromDB: string;
     let refreshTokenFromDB: string;

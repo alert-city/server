@@ -20,6 +20,7 @@ import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { AUTHORIZATION_ERROR } from '@/common/constants/code';
+import * as QRCode from 'qrcode';
 
 @Injectable()
 export class AuthService {
@@ -140,15 +141,22 @@ export class AuthService {
   async generate2FA(issuer: string, id: string): Promise<TwoFADto> {
     await this.errorContext.execute({ type: 'ID_VALIDATION', id });
     const foundUser = await this.userService.findOneUser(id);
+
     const secretBuffer = crypto.randomBytes(20);
     const company = this.configService.get('COMPANY_NAME');
+
     const secret = new base32.Encoder({ type: 'rfc4648', lc: true })
       .write(secretBuffer)
       .finalize();
+
     const totpURI = `otpauth://totp/${company}:${foundUser.username}?secret=${secret}&issuer=${issuer}`;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(totpURI)}`;
+
+    const qrCodeUrl = await QRCode.toDataURL(totpURI);
+
     await this.userService.updateUser(id, { twoFASecret: secret });
-    return { secret, qrCodeUrl };
+
+    const result = { secret, qrCodeUrl };
+    return result;
   }
 
   async verify2FACode(id: string, code: string): Promise<boolean> {
@@ -159,7 +167,7 @@ export class AuthService {
       secret,
       encoding: 'base32',
       token: code,
-      window: 3, // 可选，允许的时间偏移窗口，通常是1
+      window: 3,
     });
     await this.errorContext.execute({
       type: 'TRUE_OR_FALSE',

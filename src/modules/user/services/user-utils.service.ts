@@ -45,7 +45,9 @@ export class UserUtilsService {
           },
         })
         .pipe(
-          map((res) => res.data),
+          map((res) => {
+            return res.data;
+          }),
           catchError(async (err) => {
             await this.errorContext.execute({
               type: 'DIRECT_THROW',
@@ -55,6 +57,7 @@ export class UserUtilsService {
           }),
         ),
     );
+
     if (!response.success) {
       await this.errorContext.execute({
         type: 'DIRECT_THROW',

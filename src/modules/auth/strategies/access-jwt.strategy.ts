@@ -15,7 +15,9 @@ export class AccessJwtStrategy extends PassportStrategy(
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(), // 👈 优先从 Authorization header 读取
         (request) => {
+          // 兼容：如果没有，再从 Cookie 读取
           const cookies = request.headers.cookie;
           if (cookies) {
             const cookieArray = cookies.split(';');

@@ -35,7 +35,9 @@ export class NotificationService {
     private readonly i18nService: I18nService,
   ) {
     this.transporter = nodemailer.createTransport({
-      service: this.configService.get<string>('EMAIL_SERVICE'),
+      host: this.configService.get<string>('EMAIL_SMTP_HOST'),
+      port: this.configService.get<number>('EMAIL_SMTP_PORT'),
+      secure: false,
       auth: {
         user: this.configService.get<string>('EMAIL_USER'),
         pass: this.configService.get<string>('EMAIL_PASSWORD'),
@@ -88,12 +90,12 @@ export class NotificationService {
 `;
 
     const mailOptions = {
-      from: this.configService.get<string>('EMAIL_USER'),
+      from: `${this.configService.get<string>('EMAIL_FROM_NAME')} <${this.configService.get<string>('EMAIL_FROM')}>`,
       to: username,
       subject: subject,
       html: htmlContent,
       headers: {
-        'X-Priority': '1', // 1 = High, 3 = Normal, 5 = Low
+        'X-Priority': '1',
         'X-MSMail-Priority': 'High',
         Importance: 'High',
       },
@@ -160,12 +162,12 @@ export class NotificationService {
 `;
 
     const mailOptions = {
-      from: this.configService.get<string>('EMAIL_USER'),
+      from: `${this.configService.get<string>('EMAIL_FROM_NAME')} <${this.configService.get<string>('EMAIL_FROM')}>`,
       to: emailInfoType === 2 ? newUsername : user.username,
       subject: subject,
       html: htmlContent,
       headers: {
-        'X-Priority': '1', // 1 = High, 3 = Normal, 5 = Low
+        'X-Priority': '1',
         'X-MSMail-Priority': 'High',
         Importance: 'High',
       },

@@ -11,10 +11,10 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   app.enableCors({
     origin: [
-      'https://alertcity.sanfenginn.com',
+      'https://alertcities.com',
+      'https://www.alertcities.com',
       'http://localhost:3000',
-      'http://13.239.162.77:3000',
-      'http://13.239.162.77',
+      'http://macstudio:3000',
     ],
     exposedHeaders: ['Auth-Status', 'New-Access-Token'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -26,7 +26,7 @@ async function bootstrap() {
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ limit: '10mb', extended: true }));
   app.useGlobalPipes(new ZodValidationPipe());
-  const port = configService.get<number>('PORT') || 51004;
+  const port = configService.get<number>('PORT') || 65005;
   await app.listen(port, '0.0.0.0');
   console.log(`Server is running on http://localhost:${port}`);
 }

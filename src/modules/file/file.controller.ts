@@ -22,7 +22,7 @@ export class FilesController {
   constructor(private readonly gridFsService: GridFsService) {}
 
   @Get(':id')
-  @UseGuards(CombinedAuthGuard)
+  // @UseGuards(CombinedAuthGuard)
   async downloadFile(@Param('id') id: string, @Res() res: Response) {
     const file = await this.gridFsService.getFileMetadata(id);
     if (!file) {

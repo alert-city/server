@@ -1,4 +1,11 @@
-import { Args, Mutation, Query, Resolver, Int, Context,Subscription } from '@nestjs/graphql';
+import {
+  Args,
+  Mutation,
+  Query,
+  Resolver,
+  Int,
+  Subscription,
+} from '@nestjs/graphql';
 import { UserService } from './services/user.service';
 import { UserResponseDto } from '@/modules/user/dtos/user-response.dto';
 import {
@@ -19,8 +26,7 @@ export class UserResolver {
     private readonly userService: UserService,
     private readonly userResetPasswordService: UserPasswordService,
     @Inject('PUB_SUB') private readonly pubSub: PubSub,
-  ) {
-  }
+  ) {}
 
   @Query(() => [UserResponseDto])
   @UseGuards(CombinedAuthGuard)
@@ -59,9 +65,8 @@ export class UserResolver {
     return await this.userService.updateUser(id, input);
   }
 
-  @Subscription(()=> UserResponseDto)
+  @Subscription(() => UserResponseDto)
   userUpdated() {
-    console.log("userUpdated subscribed");
     return this.pubSub.asyncIterator('userUpdated');
   }
 
